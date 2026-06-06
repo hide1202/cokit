@@ -23,7 +23,7 @@ class CodexAppServerClient private constructor(
             capabilities: InitializeCapabilities? = null,
         ): CodexAppServerClient {
             val session = JsonRpcSession(transport, scope)
-            session.request("initialize")
+            session.sendRequest("initialize")
             session.notify("initialized")
             return CodexAppServerClient(session)
         }
@@ -33,11 +33,11 @@ class CodexAppServerClient private constructor(
 class ThreadsApi internal constructor(
     private val rpc: JsonRpcSession,
 ) {
-    suspend fun start(): JsonRpcId = rpc.request("thread/start")
+    suspend fun start(): JsonRpcId = rpc.sendRequest("thread/start")
 }
 
 class TurnsApi internal constructor(
     private val rpc: JsonRpcSession,
 ) {
-    suspend fun start(): JsonRpcId = rpc.request("turn/start")
+    suspend fun start(): JsonRpcId = rpc.sendRequest("turn/start")
 }
