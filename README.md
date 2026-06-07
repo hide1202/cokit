@@ -66,6 +66,21 @@ Run:
 ./gradlew check
 ```
 
+Run JVM unit tests only:
+
+```bash
+./gradlew test
+```
+
+Generate aggregate Kover coverage reports:
+
+```bash
+./gradlew coverage
+```
+
+The aggregate HTML report is written to `build/reports/kover/html/index.html`.
+See [Coverage](docs/coverage.md) for report paths and KMP coverage scope.
+
 To run the real app-server integration smoke test on a machine with `codex`
 installed:
 

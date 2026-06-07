@@ -3,6 +3,7 @@ kotlin = "2.3.21"
 coroutines = "1.11.0"
 serialization = "1.11.0"
 ktor = "3.5.0"
+kover = "0.9.8"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -14,3 +15,4 @@ ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.re
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
