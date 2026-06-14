@@ -53,6 +53,69 @@ interfaces. Unknown notifications may expose the upstream method name, but they
 should not expose raw JSON in the primary API. Approval-like server requests must
 remain deny-by-default unless a typed handler is registered.
 
+## Upstream Coverage Snapshot
+
+This snapshot was reviewed against the upstream app-server README on
+2026-06-14:
+
+https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md
+
+The current `CodexRpc` descriptor catalog covers the core modeled thread and
+turn request methods:
+
+- `thread/start`
+- `thread/resume`
+- `thread/fork`
+- `thread/list`
+- `thread/read`
+- `thread/archive`
+- `thread/unarchive`
+- `thread/unsubscribe`
+- `thread/name/set`
+- `turn/start`
+- `turn/steer`
+- `turn/interrupt`
+
+`CodexRpcClient.connect()` also performs the required `initialize` request and
+`initialized` notification internally.
+
+The upstream README currently documents roughly 100 request methods when the
+main API overview, auth/account surface, and initialization handshake are counted
+together. On that basis, CoKit's typed request descriptor coverage is about 12%
+of the full upstream request surface, or about 13% if the internal initialize
+handshake is counted as implemented coverage.
+
+Typed notification and server-request coverage is intentionally smaller than the
+upstream surface today:
+
+- Notifications: `CodexNotification.ThreadStarted` is modeled; unknown
+  notifications expose only the method name in the primary API.
+- Server requests: command execution approval is modeled with a typed handler.
+  Approval-like request families without typed handlers remain deny-by-default.
+
+The following upstream request groups are not yet modeled as primary typed
+descriptors:
+
+- Advanced thread APIs: loaded-thread listing, turn history paging, metadata,
+  settings, memory mode, goals, delete, compaction, shell command, background
+  terminals, rollback, realtime, and raw item injection.
+- Review and execution APIs: review start, sandboxed command execution,
+  standalone process lifecycle, and filesystem utilities.
+- Catalog and configuration APIs: model, model-provider capabilities,
+  experimental feature flags, permission profiles, environments, collaboration
+  modes, MCP status/resources/tools, config read/write/reload, Windows sandbox
+  setup, feedback upload, and external-agent import.
+- Skills, hooks, apps, and plugins: skills list/config/extra roots, hooks list,
+  marketplace operations, plugin list/install/read/uninstall, and app list.
+- Remote control APIs: enable, disable, status, pairing, client list, and client
+  revoke.
+- Auth/account APIs: account read, login, logout, rate limits, usage, and add
+  credits notification requests.
+
+Future work should add these groups as typed descriptor namespaces without
+changing the rule that primary APIs do not expose `JsonElement`, raw method
+strings, or JSON-RPC envelopes.
+
 ## Schema Generation
 
 Run:

@@ -13,11 +13,16 @@ CoKit is in early development. The current codebase includes:
 - JSON-RPC protocol envelopes and serializers.
 - A coroutine JSON-RPC session with response correlation and notification flows.
 - A high-level app-server client initialization handshake.
-- Typed thread and turn start APIs.
+- A JSON-RPC-first `CodexRpcClient` with typed descriptors for the currently
+  modeled thread and turn request APIs.
 - Default handling for server-initiated approval-like requests.
 - JVM stdio JSONL transport.
 - A guarded integration smoke test for a real local `codex app-server`.
 - A schema generation Gradle workflow for app-server JSON Schema.
+
+The upstream app-server README documents a much broader protocol surface than
+CoKit currently models. See [Protocol Compatibility](docs/protocol-compatibility.md)
+for the current coverage snapshot.
 
 ## Modules
 
@@ -37,12 +42,10 @@ CoKit is in early development. The current codebase includes:
 ## Basic Example
 
 ```kotlin
-val transport = StdioCodexTransport(
-    command = listOf("codex", "app-server", "--stdio"),
-)
+val transport = StdioCodexTransport()
 
-val client = CodexAppServerClient.connect(
-    CodexClientOptions(
+val client = CodexRpcClient.connect(
+    CodexRpcConnection(
         transport = transport,
         clientInfo = ClientInfo(
             name = "cokit_sample",
@@ -53,15 +56,17 @@ val client = CodexAppServerClient.connect(
     ),
 )
 
-val thread = client.threads.start(
-    StartThreadRequest(cwd = CodexHostPath("/path/to/project")),
-)
-val turn = client.turns.start(
-    StartTurnRequest(
+val thread = client.request(
+    CodexRpc.Thread.Start,
+    ThreadStartParams(cwd = CodexHostPath("/path/to/project")),
+).thread
+val turn = client.request(
+    CodexRpc.Turn.Start,
+    TurnStartParams(
         threadId = thread.id,
         input = listOf(TurnInput.Text("Summarize this repository")),
     ),
-)
+).turn
 ```
 
 ## Sample CLI
