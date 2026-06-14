@@ -84,6 +84,7 @@ turn request methods:
 - `thread/unarchive`
 - `thread/unsubscribe`
 - `thread/name/set`
+- `thread/metadata/update`
 - `turn/start`
 - `turn/steer`
 - `turn/interrupt`
@@ -98,15 +99,15 @@ request descriptor count is exact.
 <!-- codex-rpc-coverage:start -->
 | Inventory section | `modeled` | `partial` | `deferred` | `experimental` | Exact current coverage |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Request groups | 0 | 3 | 13 | 6 | 12 public `CodexRpc` request descriptors |
+| Request groups | 0 | 4 | 12 | 6 | 13 public `CodexRpc` request descriptors |
 | Notification groups | 0 | 1 | 16 | 7 | Not counted by this helper |
 | Server-request groups | 0 | 4 | 1 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
 The upstream README currently documents roughly 100 request methods when the
 main API overview, auth/account surface, and initialization handshake are counted
-together. On that basis, CoKit's typed request descriptor coverage is about 12%
-of the full upstream request surface, or about 13% if the internal initialize
+together. On that basis, CoKit's typed request descriptor coverage is about 13%
+of the full upstream request surface, or about 14% if the internal initialize
 handshake is counted as implemented coverage.
 
 Typed notification and server-request coverage is intentionally smaller than the
@@ -120,8 +121,8 @@ upstream surface today:
 The following upstream request groups are not yet modeled as primary typed
 descriptors:
 
-- Advanced thread APIs: loaded-thread listing, turn history paging, metadata,
-  settings, memory mode, goals, delete, compaction, shell command, background
+- Advanced thread APIs: loaded-thread listing, turn history paging, settings,
+  memory mode, goals, delete, compaction, shell command, background
   terminals, rollback, realtime, and raw item injection.
 - Review and execution APIs: review start, sandboxed command execution,
   standalone process lifecycle, and filesystem utilities.

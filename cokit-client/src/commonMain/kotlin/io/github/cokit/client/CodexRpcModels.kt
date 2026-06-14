@@ -92,6 +92,17 @@ data class ThreadSetNameParams(
 )
 
 @Serializable
+data class ThreadMetadataUpdateParams(
+    val threadId: ThreadId,
+    val gitInfo: ThreadGitInfoPatch? = null,
+)
+
+@Serializable
+data class ThreadMetadataUpdateResult(
+    val thread: Thread,
+)
+
+@Serializable
 data class TurnStartParams(
     val threadId: ThreadId,
     @EncodeDefault(EncodeDefault.Mode.ALWAYS)

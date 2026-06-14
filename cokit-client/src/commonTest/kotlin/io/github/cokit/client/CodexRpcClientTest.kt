@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
@@ -181,6 +182,59 @@ class CodexRpcClientTest {
                 ),
                 "thread/name/set",
             ),
+        )
+    }
+
+    @Test
+    fun threadMetadataDescriptorSendsPatchAndDecodesRefreshedThread() = runTest {
+        val fixture = connectedRpcClientFixture(backgroundScope)
+
+        val deferred = async {
+            fixture.client.request(
+                CodexRpc.Thread.UpdateMetadata,
+                ThreadMetadataUpdateParams(
+                    threadId = ThreadId("thr_123"),
+                    gitInfo = ThreadGitInfoPatch(
+                        sha = ThreadMetadataPatchValue.Clear,
+                        branch = ThreadMetadataPatchValue.Set("feature/sidebar-pr"),
+                    ),
+                ),
+            )
+        }
+        runCurrent()
+
+        val sent = fixture.transport.sent.last() as JsonRpcRequest
+        assertEquals("thread/metadata/update", sent.method)
+        val sentParams = sent.params!!.jsonObject
+        assertEquals("thr_123", sentParams["threadId"]?.jsonPrimitive?.contentOrNull)
+        val gitInfo = sentParams["gitInfo"]!!.jsonObject
+        assertEquals(JsonNull, gitInfo["sha"])
+        assertEquals("feature/sidebar-pr", gitInfo["branch"]?.jsonPrimitive?.contentOrNull)
+        assertTrue("originUrl" !in gitInfo)
+
+        fixture.transport.receive(
+            JsonRpcResponse(
+                sent.id,
+                result = buildJsonObject {
+                    put("thread", buildJsonObject {
+                        put("id", "thr_123")
+                        put("gitInfo", buildJsonObject {
+                            put("sha", JsonNull)
+                            put("branch", "feature/sidebar-pr")
+                            put("originUrl", JsonNull)
+                        })
+                    })
+                },
+            ),
+        )
+
+        assertEquals(
+            ThreadGitInfo(
+                sha = null,
+                branch = "feature/sidebar-pr",
+                originUrl = null,
+            ),
+            deferred.await().thread.gitInfo,
         )
     }
 

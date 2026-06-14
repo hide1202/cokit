@@ -30,7 +30,7 @@ modeled coverage. They are compatibility behavior only.
 | --- | --- | --- | --- |
 | Connection lifecycle | partial | `initialize`, `initialized` | `CodexRpcClient.connect()` and `CodexAppServerClient.connect()` perform the handshake internally with typed `InitializeParams` and `InitializeCapabilities`. There is no public `CodexRpc` descriptor for `initialize`. |
 | Core thread lifecycle | partial | `thread/start`, `thread/resume`, `thread/fork`, `thread/list`, `thread/read`, `thread/archive`, `thread/unarchive`, `thread/unsubscribe`, `thread/name/set` | Typed `CodexRpc.Thread` descriptors exist. Some params and result fields remain compatibility-limited or intentionally narrow. |
-| Advanced thread history and metadata | deferred | `thread/loaded/list`, `thread/turns/list`, `thread/turns/items/list`, `thread/metadata/update`, `thread/settings/update`, `thread/memoryMode/set`, `memory/reset`, `thread/goal/set`, `thread/goal/get`, `thread/goal/clear`, `thread/delete`, `thread/compact/start`, `thread/shellCommand`, `thread/backgroundTerminals/clean`, `thread/backgroundTerminals/list`, `thread/backgroundTerminals/terminate`, `thread/rollback`, `thread/inject_items` | No typed descriptors yet. Experimental and currently unsupported entries stay out of the stable client API. |
+| Advanced thread history and metadata | partial | `thread/loaded/list`, `thread/turns/list`, `thread/turns/items/list`, `thread/metadata/update`, `thread/settings/update`, `thread/memoryMode/set`, `memory/reset`, `thread/goal/set`, `thread/goal/get`, `thread/goal/clear`, `thread/delete`, `thread/compact/start`, `thread/shellCommand`, `thread/backgroundTerminals/clean`, `thread/backgroundTerminals/list`, `thread/backgroundTerminals/terminate`, `thread/rollback`, `thread/inject_items` | `CodexRpc.Thread.UpdateMetadata` models the stable `gitInfo` metadata patch and refreshed thread response. Other advanced, experimental, or currently unsupported entries remain deferred. |
 | Turn lifecycle | partial | `turn/start`, `turn/steer`, `turn/interrupt` | Typed `CodexRpc.Turn` descriptors exist. Experimental params such as environment selection and some schema-shaped fields are not fully modeled. |
 | Thread realtime | experimental | `thread/realtime/start`, `thread/realtime/appendAudio`, `thread/realtime/appendText`, `thread/realtime/stop` | Deferred. Realtime requires explicit experimental opt-in before CoKit should expose descriptors. |
 | Review | deferred | `review/start` | No typed descriptor yet. Review item notifications are also deferred. |
@@ -109,6 +109,7 @@ without updating the public inventory.
 | `CodexRpc.Thread.Unarchive` | `thread/unarchive` | Thread lifecycle descriptor; group coverage remains partial. |
 | `CodexRpc.Thread.Unsubscribe` | `thread/unsubscribe` | Thread lifecycle descriptor; group coverage remains partial. |
 | `CodexRpc.Thread.SetName` | `thread/name/set` | Thread lifecycle descriptor; group coverage remains partial. |
+| `CodexRpc.Thread.UpdateMetadata` | `thread/metadata/update` | Metadata descriptor; advanced thread coverage remains partial. |
 | `CodexRpc.Turn.Start` | `turn/start` | Turn lifecycle descriptor; group coverage remains partial. |
 | `CodexRpc.Turn.Steer` | `turn/steer` | Turn lifecycle descriptor; group coverage remains partial. |
 | `CodexRpc.Turn.Interrupt` | `turn/interrupt` | Turn lifecycle descriptor; group coverage remains partial. |
@@ -126,6 +127,7 @@ Current public request descriptors:
 - `thread/unarchive`
 - `thread/unsubscribe`
 - `thread/name/set`
+- `thread/metadata/update`
 - `turn/start`
 - `turn/steer`
 - `turn/interrupt`

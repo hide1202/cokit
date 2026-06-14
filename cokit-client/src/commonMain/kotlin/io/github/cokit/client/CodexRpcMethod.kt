@@ -68,6 +68,12 @@ object CodexRpc {
             resultSerializer = CodexRpcUnit.serializer(),
             emptyResult = CodexRpcUnit,
         )
+
+        val UpdateMetadata: CodexRpcMethod<ThreadMetadataUpdateParams, ThreadMetadataUpdateResult> = CodexRpcMethod(
+            method = "thread/metadata/update",
+            paramsSerializer = ThreadMetadataUpdateParams.serializer(),
+            resultSerializer = ThreadMetadataUpdateResult.serializer(),
+        )
     }
 
     object Turn {

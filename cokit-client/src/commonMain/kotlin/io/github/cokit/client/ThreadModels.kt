@@ -1,6 +1,21 @@
 package io.github.cokit.client
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.put
 
 @Serializable
 @JvmInline
@@ -29,7 +44,85 @@ data class Thread(
     val modelProvider: String? = null,
     val createdAt: CodexTimestamp? = null,
     val updatedAt: CodexTimestamp? = null,
+    val gitInfo: ThreadGitInfo? = null,
 )
+
+@Serializable
+data class ThreadGitInfo(
+    val sha: String? = null,
+    val branch: String? = null,
+    val originUrl: String? = null,
+)
+
+sealed interface ThreadMetadataPatchValue {
+    data object Unchanged : ThreadMetadataPatchValue
+    data object Clear : ThreadMetadataPatchValue
+    data class Set(val value: String) : ThreadMetadataPatchValue
+}
+
+@Serializable(with = ThreadGitInfoPatchSerializer::class)
+data class ThreadGitInfoPatch(
+    val sha: ThreadMetadataPatchValue = ThreadMetadataPatchValue.Unchanged,
+    val branch: ThreadMetadataPatchValue = ThreadMetadataPatchValue.Unchanged,
+    val originUrl: ThreadMetadataPatchValue = ThreadMetadataPatchValue.Unchanged,
+)
+
+object ThreadGitInfoPatchSerializer : KSerializer<ThreadGitInfoPatch> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ThreadGitInfoPatch") {
+        element<String?>("sha", isOptional = true)
+        element<String?>("branch", isOptional = true)
+        element<String?>("originUrl", isOptional = true)
+    }
+
+    override fun serialize(encoder: Encoder, value: ThreadGitInfoPatch) {
+        val jsonEncoder = encoder as? JsonEncoder
+            ?: throw SerializationException("ThreadGitInfoPatch requires JSON encoding")
+        jsonEncoder.encodeJsonElement(
+            buildJsonObject {
+                putPatchValue("sha", value.sha)
+                putPatchValue("branch", value.branch)
+                putPatchValue("originUrl", value.originUrl)
+            },
+        )
+    }
+
+    override fun deserialize(decoder: Decoder): ThreadGitInfoPatch {
+        val jsonDecoder = decoder as? JsonDecoder
+            ?: throw SerializationException("ThreadGitInfoPatch requires JSON decoding")
+        val element = jsonDecoder.decodeJsonElement()
+        val jsonObject = element as? JsonObject
+            ?: throw SerializationException("ThreadGitInfoPatch must be a JSON object")
+        return ThreadGitInfoPatch(
+            sha = jsonObject.decodePatchValue("sha"),
+            branch = jsonObject.decodePatchValue("branch"),
+            originUrl = jsonObject.decodePatchValue("originUrl"),
+        )
+    }
+
+    private fun kotlinx.serialization.json.JsonObjectBuilder.putPatchValue(
+        key: String,
+        value: ThreadMetadataPatchValue,
+    ) {
+        when (value) {
+            ThreadMetadataPatchValue.Unchanged -> Unit
+            ThreadMetadataPatchValue.Clear -> put(key, JsonNull)
+            is ThreadMetadataPatchValue.Set -> put(key, value.value)
+        }
+    }
+
+    private fun JsonObject.decodePatchValue(key: String): ThreadMetadataPatchValue {
+        val value = this[key] ?: return ThreadMetadataPatchValue.Unchanged
+        return when (value) {
+            JsonNull -> ThreadMetadataPatchValue.Clear
+            is JsonPrimitive -> {
+                val text = value.contentOrNull
+                    ?: throw SerializationException("ThreadGitInfoPatch.$key must be a string or null")
+                ThreadMetadataPatchValue.Set(text)
+            }
+            else -> throw SerializationException("ThreadGitInfoPatch.$key must be a string or null")
+        }
+    }
+}
 
 @Serializable
 data class ThreadList(
