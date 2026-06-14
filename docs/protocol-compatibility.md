@@ -15,6 +15,11 @@ Stable APIs should be available without special opt-in. Experimental APIs should
 require explicit Kotlin opt-in annotations and app-server initialization
 capabilities where upstream requires them.
 
+Client-level experimental protocol surfaces use `ExperimentalCodexApi`.
+Experimental descriptors must require `@ExperimentalCodexApi` at the Kotlin API
+usage site and must also require the matching app-server initialization
+capability opt-in before they become usable.
+
 The WebSocket transport is currently marked experimental because upstream marks
 that transport as experimental.
 
