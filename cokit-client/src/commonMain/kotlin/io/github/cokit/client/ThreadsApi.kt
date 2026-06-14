@@ -1,82 +1,84 @@
 package io.github.cokit.client
 
-import io.github.cokit.protocol.CodexProtocolJson
 import io.github.cokit.rpc.JsonRpcSession
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.encodeToJsonElement
 
 class ThreadsApi internal constructor(
     private val rpc: JsonRpcSession,
 ) {
     suspend fun start(request: StartThreadRequest = StartThreadRequest()): Thread {
-        val result = rpc.request(
-            method = "thread/start",
-            params = CodexProtocolJson.encodeToJsonElement(StartThreadRequest.serializer(), request),
-        )
-        return result.decodeResult<ThreadResult>().thread
+        return rpc.request(CodexRpc.Thread.Start, request.toRpcParams()).thread
     }
 
     suspend fun resume(request: ResumeThreadRequest): Thread {
-        val result = rpc.request(
-            method = "thread/resume",
-            params = CodexProtocolJson.encodeToJsonElement(ResumeThreadRequest.serializer(), request),
-        )
-        return result.decodeResult<ThreadResult>().thread
+        return rpc.request(CodexRpc.Thread.Resume, request.toRpcParams()).thread
     }
 
     suspend fun fork(request: ForkThreadRequest): Thread {
-        val result = rpc.request(
-            method = "thread/fork",
-            params = CodexProtocolJson.encodeToJsonElement(ForkThreadRequest.serializer(), request),
-        )
-        return result.decodeResult<ThreadResult>().thread
+        return rpc.request(CodexRpc.Thread.Fork, request.toRpcParams()).thread
     }
 
     suspend fun list(request: ListThreadsRequest = ListThreadsRequest()): ThreadList {
-        val result = rpc.request(
-            method = "thread/list",
-            params = CodexProtocolJson.encodeToJsonElement(ListThreadsRequest.serializer(), request),
-        )
-        val decoded = result.decodeResult<ThreadListResult>()
+        val decoded = rpc.request(CodexRpc.Thread.List, request.toRpcParams())
         return ThreadList(decoded.threads, decoded.cursor)
     }
 
     suspend fun read(request: ReadThreadRequest): Thread {
-        val result = rpc.request(
-            method = "thread/read",
-            params = CodexProtocolJson.encodeToJsonElement(ReadThreadRequest.serializer(), request),
-        )
-        return result.decodeResult<ThreadResult>().thread
+        return rpc.request(CodexRpc.Thread.Read, request.toRpcParams()).thread
     }
 
     suspend fun archive(threadId: ThreadId) {
-        requestThreadMutation("thread/archive", threadId)
+        rpc.request(CodexRpc.Thread.Archive, ThreadArchiveParams(threadId))
     }
 
     suspend fun unarchive(threadId: ThreadId) {
-        requestThreadMutation("thread/unarchive", threadId)
+        rpc.request(CodexRpc.Thread.Unarchive, ThreadUnarchiveParams(threadId))
     }
 
     suspend fun unsubscribe(threadId: ThreadId) {
-        requestThreadMutation("thread/unsubscribe", threadId)
+        rpc.request(CodexRpc.Thread.Unsubscribe, ThreadUnsubscribeParams(threadId))
     }
 
     suspend fun setName(request: SetThreadNameRequest) {
-        rpc.request(
-            method = "thread/name/set",
-            params = CodexProtocolJson.encodeToJsonElement(SetThreadNameRequest.serializer(), request),
-        )
-    }
-
-    private suspend fun requestThreadMutation(method: String, threadId: ThreadId) {
-        rpc.request(
-            method = method,
-            params = CodexProtocolJson.encodeToJsonElement(ThreadMutationRequest.serializer(), ThreadMutationRequest(threadId)),
-        )
+        rpc.request(CodexRpc.Thread.SetName, request.toRpcParams())
     }
 }
 
-@Serializable
-private data class ThreadMutationRequest(
-    val threadId: ThreadId,
+private fun StartThreadRequest.toRpcParams(): ThreadStartParams = ThreadStartParams(
+    cwd = cwd,
+    approvalPolicy = approvalPolicy,
+    sandbox = sandbox,
+    permissions = permissions,
+    model = model,
+    effort = effort,
+    personality = personality,
+)
+
+private fun ResumeThreadRequest.toRpcParams(): ThreadResumeParams = ThreadResumeParams(
+    threadId = threadId,
+    excludeTurns = excludeTurns,
+    initialTurnsPage = initialTurnsPage,
+)
+
+private fun ForkThreadRequest.toRpcParams(): ThreadForkParams = ThreadForkParams(
+    threadId = threadId,
+    ephemeral = ephemeral,
+    excludeTurns = excludeTurns,
+)
+
+private fun ListThreadsRequest.toRpcParams(): ThreadListParams = ThreadListParams(
+    cursor = cursor,
+    limit = limit,
+    cwd = cwd,
+    archived = archived,
+    searchTerm = searchTerm,
+)
+
+private fun ReadThreadRequest.toRpcParams(): ThreadReadParams = ThreadReadParams(
+    threadId = threadId,
+    includeTurns = includeTurns,
+)
+
+private fun SetThreadNameRequest.toRpcParams(): ThreadSetNameParams = ThreadSetNameParams(
+    threadId = threadId,
+    name = name,
 )

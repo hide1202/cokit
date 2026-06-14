@@ -42,8 +42,3 @@ data class InterruptTurnRequest(
     val threadId: ThreadId,
     val turnId: TurnId,
 )
-
-@Serializable
-internal data class TurnResult(
-    val turn: Turn,
-)

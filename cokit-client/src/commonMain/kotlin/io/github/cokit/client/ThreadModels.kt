@@ -65,14 +65,3 @@ data class SetThreadNameRequest(
     val threadId: ThreadId,
     val name: String,
 )
-
-@Serializable
-internal data class ThreadResult(
-    val thread: Thread,
-)
-
-@Serializable
-internal data class ThreadListResult(
-    val threads: List<Thread> = emptyList(),
-    val cursor: String? = null,
-)

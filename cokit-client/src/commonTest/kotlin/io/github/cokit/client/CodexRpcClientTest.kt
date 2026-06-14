@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
@@ -85,6 +86,134 @@ class CodexRpcClientTest {
         )
 
         assertEquals(TurnId("turn_123"), turn.await().turn.id)
+    }
+
+    @Test
+    fun threadDescriptorsExposeEveryThreadRpcMethod() = runTest {
+        val fixture = connectedRpcClientFixture(backgroundScope)
+
+        assertEquals(
+            ThreadId("thr_resume"),
+            fixture.requestThreadResult(
+                this,
+                CodexRpc.Thread.Resume,
+                ThreadResumeParams(threadId = ThreadId("thr_123")),
+                "thread/resume",
+                "thr_resume",
+            ).thread.id,
+        )
+        assertEquals(
+            ThreadId("thr_fork"),
+            fixture.requestThreadResult(
+                this,
+                CodexRpc.Thread.Fork,
+                ThreadForkParams(
+                    threadId = ThreadId("thr_123"),
+                    ephemeral = true,
+                    excludeTurns = listOf(TurnId("turn_1")),
+                ),
+                "thread/fork",
+                "thr_fork",
+            ).thread.id,
+        )
+        assertEquals(
+            listOf(ThreadId("thr_1"), ThreadId("thr_2")),
+            fixture.requestThreadListResult(
+                this,
+                ThreadListParams(
+                    cursor = "cursor_1",
+                    limit = 10,
+                    cwd = CodexHostPath("/path/to/project"),
+                    archived = false,
+                    searchTerm = "sample",
+                ),
+            ).threads.map { it.id },
+        )
+        assertEquals(
+            ThreadId("thr_read"),
+            fixture.requestThreadResult(
+                this,
+                CodexRpc.Thread.Read,
+                ThreadReadParams(
+                    threadId = ThreadId("thr_123"),
+                    includeTurns = true,
+                ),
+                "thread/read",
+                "thr_read",
+            ).thread.id,
+        )
+
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Thread.Archive,
+                ThreadArchiveParams(ThreadId("thr_123")),
+                "thread/archive",
+            ),
+        )
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Thread.Unarchive,
+                ThreadUnarchiveParams(ThreadId("thr_123")),
+                "thread/unarchive",
+            ),
+        )
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Thread.Unsubscribe,
+                ThreadUnsubscribeParams(ThreadId("thr_123")),
+                "thread/unsubscribe",
+            ),
+        )
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Thread.SetName,
+                ThreadSetNameParams(
+                    threadId = ThreadId("thr_123"),
+                    name = "New name",
+                ),
+                "thread/name/set",
+            ),
+        )
+    }
+
+    @Test
+    fun turnDescriptorsExposeEveryTurnRpcMethod() = runTest {
+        val fixture = connectedRpcClientFixture(backgroundScope)
+
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Turn.Steer,
+                TurnSteerParams(
+                    threadId = ThreadId("thr_123"),
+                    expectedTurnId = TurnId("turn_123"),
+                    input = listOf(TurnInput.Text("Keep going")),
+                    clientUserMessageId = "msg_123",
+                ),
+                "turn/steer",
+            ),
+        )
+        assertEquals(
+            CodexRpcUnit,
+            fixture.requestUnitResult(
+                this,
+                CodexRpc.Turn.Interrupt,
+                TurnInterruptParams(
+                    threadId = ThreadId("thr_123"),
+                    turnId = TurnId("turn_123"),
+                ),
+                "turn/interrupt",
+            ),
+        )
     }
 
     @Test
@@ -173,5 +302,74 @@ class CodexRpcClientTest {
     private data class ConnectedRpcClientFixture(
         val client: CodexRpcClient,
         val transport: FakeJsonRpcTransport,
-    )
+    ) {
+        suspend fun <P : Any, R : Any> requestThreadResult(
+            scope: TestScope,
+            method: CodexRpcMethod<P, R>,
+            params: P,
+            expectedMethod: String,
+            responseThreadId: String,
+        ): R {
+            val deferred = scope.async { client.request(method, params) }
+            scope.runCurrent()
+            val sent = transport.sent.last() as JsonRpcRequest
+            assertEquals(expectedMethod, sent.method)
+            transport.receive(
+                JsonRpcResponse(
+                    sent.id,
+                    result = buildJsonObject {
+                        put("thread", buildJsonObject { put("id", responseThreadId) })
+                    },
+                ),
+            )
+            return deferred.await()
+        }
+
+        suspend fun requestThreadListResult(
+            scope: TestScope,
+            params: ThreadListParams,
+        ): ThreadListResult {
+            val deferred = scope.async { client.request(CodexRpc.Thread.List, params) }
+            scope.runCurrent()
+            val sent = transport.sent.last() as JsonRpcRequest
+            assertEquals("thread/list", sent.method)
+            val sentParams = sent.params!!.jsonObject
+            assertEquals("cursor_1", sentParams["cursor"]?.jsonPrimitive?.contentOrNull)
+            assertEquals("10", sentParams["limit"]?.jsonPrimitive.toString())
+            assertEquals("/path/to/project", sentParams["cwd"]?.jsonPrimitive?.contentOrNull)
+            assertEquals("false", sentParams["archived"]?.jsonPrimitive.toString())
+            assertEquals("sample", sentParams["searchTerm"]?.jsonPrimitive?.contentOrNull)
+
+            transport.receive(
+                JsonRpcResponse(
+                    sent.id,
+                    result = buildJsonObject {
+                        put(
+                            "threads",
+                            kotlinx.serialization.json.buildJsonArray {
+                                add(buildJsonObject { put("id", "thr_1") })
+                                add(buildJsonObject { put("id", "thr_2") })
+                            },
+                        )
+                        put("cursor", "cursor_2")
+                    },
+                ),
+            )
+            return deferred.await()
+        }
+
+        suspend fun <P : Any> requestUnitResult(
+            scope: TestScope,
+            method: CodexRpcMethod<P, CodexRpcUnit>,
+            params: P,
+            expectedMethod: String,
+        ): CodexRpcUnit {
+            val deferred = scope.async { client.request(method, params) }
+            scope.runCurrent()
+            val sent = transport.sent.last() as JsonRpcRequest
+            assertEquals(expectedMethod, sent.method)
+            transport.receive(JsonRpcResponse(sent.id))
+            return deferred.await()
+        }
+    }
 }

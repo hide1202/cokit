@@ -25,6 +25,11 @@ through typed descriptors such as `CodexRpc.Thread.Start`, not through ad hoc
 raw strings. Each descriptor should bind one typed params model to one typed
 result model.
 
+All modeled thread and turn request methods should be present in the
+`CodexRpc` descriptor catalog. Compatibility facades such as thread and turn
+helpers should delegate through those descriptors instead of carrying separate
+method strings.
+
 Client APIs should accept request objects instead of long parameter lists.
 Identifiers and common options should use small value classes such as
 `ThreadId`, `TurnId`, `CodexHostPath`, `ApprovalPolicy`, `SandboxPolicy`, and

@@ -50,13 +50,7 @@ class CodexRpcClient private constructor(
     suspend fun <P : Any, R : Any> request(
         method: CodexRpcMethod<P, R>,
         params: P,
-    ): R {
-        val result = rpc.request(
-            method = method.method,
-            params = CodexProtocolJson.encodeToJsonElement(method.paramsSerializer, params),
-        )
-        return result.decodeResult(method.resultSerializer)
-    }
+    ): R = rpc.request(method, params)
 
     fun registerCommandApprovalHandler(handler: CommandApprovalHandler) {
         commandApprovalHandler = handler
