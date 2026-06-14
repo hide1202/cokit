@@ -56,9 +56,13 @@ remain deny-by-default unless a typed handler is registered.
 ## Upstream Coverage Snapshot
 
 This snapshot was reviewed against the upstream app-server README on
-2026-06-14:
+2026-06-15:
 
 https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md
+
+The checked protocol inventory groups upstream request, notification, and
+server-request surfaces by current CoKit coverage:
+[Protocol Inventory](protocol-inventory.md).
 
 The current `CodexRpc` descriptor catalog covers the core modeled thread and
 turn request methods:
