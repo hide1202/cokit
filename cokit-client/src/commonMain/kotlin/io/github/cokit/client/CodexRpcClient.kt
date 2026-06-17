@@ -3,6 +3,7 @@ package io.github.cokit.client
 import io.github.cokit.client.approvals.CommandApprovalHandler
 import io.github.cokit.client.approvals.FileChangeApprovalHandler
 import io.github.cokit.client.approvals.PermissionApprovalHandler
+import io.github.cokit.client.server.UserInputRequestHandler
 import io.github.cokit.protocol.CodexProtocolJson
 import io.github.cokit.protocol.JsonRpcRequest
 import io.github.cokit.protocol.JsonRpcResponse
@@ -37,6 +38,7 @@ class CodexRpcClient private constructor(
     private var commandApprovalHandler: CommandApprovalHandler? = null
     private var fileChangeApprovalHandler: FileChangeApprovalHandler? = null
     private var permissionApprovalHandler: PermissionApprovalHandler? = null
+    private var userInputRequestHandler: UserInputRequestHandler? = null
     private val serverRequestJob: Job = scope.launch {
         rpc.serverRequests.collect { request ->
             mutableServerRequests.tryEmit(request.toCodexServerRequest())
@@ -66,6 +68,10 @@ class CodexRpcClient private constructor(
 
     fun registerPermissionApprovalHandler(handler: PermissionApprovalHandler) {
         permissionApprovalHandler = handler
+    }
+
+    fun registerUserInputRequestHandler(handler: UserInputRequestHandler) {
+        userInputRequestHandler = handler
     }
 
     override fun close() {
@@ -134,6 +140,29 @@ class CodexRpcClient private constructor(
                 JsonRpcResponse(
                     id = request.id,
                     result = permissionHandler.decide(permissionRequest).toProtocolPayload().toJsonElement(),
+                )
+            } catch (error: Throwable) {
+                JsonRpcResponse(
+                    id = request.id,
+                    error = serverRequestHandlerError(),
+                )
+            }
+        }
+
+        val userInputHandler = userInputRequestHandler
+        if (request.method == USER_INPUT_REQUEST_METHOD && userInputHandler != null) {
+            val userInputRequest = try {
+                request.decodeUserInputRequest()
+            } catch (error: Throwable) {
+                return JsonRpcResponse(
+                    id = request.id,
+                    error = invalidServerRequestParamsError(request.method),
+                )
+            }
+            return try {
+                JsonRpcResponse(
+                    id = request.id,
+                    result = userInputHandler.respond(userInputRequest).toProtocolPayload().toJsonElement(),
                 )
             } catch (error: Throwable) {
                 JsonRpcResponse(

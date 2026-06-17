@@ -42,6 +42,15 @@ session approval cache; `PermissionGrantScope.Turn` keeps the grant scoped to
 the current turn. Malformed params and handler failures use the same JSON-RPC
 error behavior as command approvals.
 
+User-input prompt requests are cancel-by-default. Without a registered typed
+user-input request handler, CoKit responds with `{"decision":"cancel"}` and
+never fabricates prompt answers. With a typed user-input request handler, CoKit
+exposes the request ids, prompt headers, question text, choice options,
+free-form flags, secret flags, and optional auto-resolution timeout before
+invoking application code. Handler responses must return either typed cancel or
+explicit answer maps keyed by question id. Malformed params and handler failures
+use the same JSON-RPC error behavior as command approvals.
+
 ## Host Semantics
 
 Paths, commands, process APIs, and filesystem APIs refer to the app-server host.
