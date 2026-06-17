@@ -51,6 +51,17 @@ invoking application code. Handler responses must return either typed cancel or
 explicit answer maps keyed by question id. Malformed params and handler failures
 use the same JSON-RPC error behavior as command approvals.
 
+MCP elicitation requests are decline-by-default. Without a registered typed MCP
+elicitation handler, CoKit responds with `{"action":"decline","content":null}`
+and never supplies structured form content or opens URL flows on behalf of an
+application. With a typed MCP elicitation handler, CoKit exposes the server
+name, thread id, optional turn id, message, and either a typed form schema or a
+URL elicitation target before invoking application code. Application policy owns
+all user decisions and should treat MCP-provided text, URLs, and requested form
+fields as untrusted input. Handler responses must return explicit accept,
+decline, or cancel actions. Malformed params and handler failures use the same
+JSON-RPC error behavior as command approvals.
+
 ## Host Semantics
 
 Paths, commands, process APIs, and filesystem APIs refer to the app-server host.

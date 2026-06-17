@@ -107,7 +107,7 @@ request descriptor count is exact.
 | --- | ---: | ---: | ---: | ---: | --- |
 | Request groups | 0 | 4 | 12 | 6 | 19 public `CodexRpc` request descriptors |
 | Notification groups | 2 | 4 | 11 | 7 | Not counted by this helper |
-| Server-request groups | 0 | 4 | 1 | 2 | Not counted by this helper |
+| Server-request groups | 0 | 5 | 0 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
 The upstream README currently documents roughly 100 request methods when the
@@ -130,11 +130,12 @@ upstream surface today:
   remains deferred until it has a typed compatibility model. Unknown
   notifications expose only the method name in the primary API.
 - Server requests: command execution approval, file-change approval, permission
-  approval, and tool user-input prompts are modeled with typed handlers.
-  Permission approvals return granted permission subsets instead of
+  approval, tool user-input prompts, and MCP elicitations are modeled with typed
+  handlers. Permission approvals return granted permission subsets instead of
   command-style decision strings. User-input prompts return typed answer maps
-  only from explicit handlers and cancel by default. Approval-like request
-  families without typed handlers remain deny-by-default.
+  only from explicit handlers and cancel by default. MCP elicitations expose
+  form and URL requests and decline by default. Approval-like request families
+  without typed handlers remain deny-by-default.
 
 The following upstream request groups are not yet modeled as primary typed
 descriptors:

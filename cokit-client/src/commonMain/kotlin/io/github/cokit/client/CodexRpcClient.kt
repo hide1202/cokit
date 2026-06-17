@@ -3,6 +3,7 @@ package io.github.cokit.client
 import io.github.cokit.client.approvals.CommandApprovalHandler
 import io.github.cokit.client.approvals.FileChangeApprovalHandler
 import io.github.cokit.client.approvals.PermissionApprovalHandler
+import io.github.cokit.client.mcp.McpElicitationHandler
 import io.github.cokit.client.server.UserInputRequestHandler
 import io.github.cokit.protocol.CodexProtocolJson
 import io.github.cokit.protocol.JsonRpcRequest
@@ -39,6 +40,7 @@ class CodexRpcClient private constructor(
     private var fileChangeApprovalHandler: FileChangeApprovalHandler? = null
     private var permissionApprovalHandler: PermissionApprovalHandler? = null
     private var userInputRequestHandler: UserInputRequestHandler? = null
+    private var mcpElicitationHandler: McpElicitationHandler? = null
     private val serverRequestJob: Job = scope.launch {
         rpc.serverRequests.collect { request ->
             mutableServerRequests.tryEmit(request.toCodexServerRequest())
@@ -72,6 +74,10 @@ class CodexRpcClient private constructor(
 
     fun registerUserInputRequestHandler(handler: UserInputRequestHandler) {
         userInputRequestHandler = handler
+    }
+
+    fun registerMcpElicitationHandler(handler: McpElicitationHandler) {
+        mcpElicitationHandler = handler
     }
 
     override fun close() {
@@ -163,6 +169,29 @@ class CodexRpcClient private constructor(
                 JsonRpcResponse(
                     id = request.id,
                     result = userInputHandler.respond(userInputRequest).toProtocolPayload().toJsonElement(),
+                )
+            } catch (error: Throwable) {
+                JsonRpcResponse(
+                    id = request.id,
+                    error = serverRequestHandlerError(),
+                )
+            }
+        }
+
+        val mcpHandler = mcpElicitationHandler
+        if (request.method == MCP_ELICITATION_REQUEST_METHOD && mcpHandler != null) {
+            val mcpRequest = try {
+                request.decodeMcpElicitationRequest()
+            } catch (error: Throwable) {
+                return JsonRpcResponse(
+                    id = request.id,
+                    error = invalidServerRequestParamsError(request.method),
+                )
+            }
+            return try {
+                JsonRpcResponse(
+                    id = request.id,
+                    result = mcpHandler.respond(mcpRequest).toProtocolPayload().toJsonElement(),
                 )
             } catch (error: Throwable) {
                 JsonRpcResponse(

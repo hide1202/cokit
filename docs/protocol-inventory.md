@@ -89,7 +89,7 @@ modeled coverage. They are compatibility behavior only.
 | Permission grant approval | partial | `item/permissions/requestApproval` | Typed `CodexServerRequest.PermissionApproval` and approval handlers exist for requested filesystem/network grants. Without a handler, CoKit returns an empty granted-permissions profile. |
 | Dynamic tool call | experimental | `item/tool/call` | Deferred. Without a handler, CoKit declines by default. |
 | Tool user-input prompt | experimental | `item/tool/requestUserInput` | Typed `CodexServerRequest.UserInput` and user-input handlers exist for questions, options, and answer maps. Upstream marks this flow experimental. Without a handler, CoKit cancels by default. |
-| MCP elicitation | deferred | `mcpServer/elicitation/request` | No typed request model yet. Without a handler, CoKit declines by default. |
+| MCP elicitation | partial | `mcpServer/elicitation/request` | Typed `CodexServerRequest.McpElicitation` and MCP elicitation handlers exist for form and URL requests. Without a handler, CoKit declines by default. |
 | Attestation generation | partial | `attestation/generate` | No typed request model yet. Without a handler, CoKit returns an unsupported status by default. |
 
 ## Current Modeled Request Descriptors
@@ -165,3 +165,4 @@ Current typed server request:
 - `item/fileChange/requestApproval`
 - `item/permissions/requestApproval`
 - `item/tool/requestUserInput`
+- `mcpServer/elicitation/request`
