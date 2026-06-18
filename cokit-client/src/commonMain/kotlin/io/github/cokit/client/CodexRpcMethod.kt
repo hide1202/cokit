@@ -18,6 +18,10 @@ import io.github.cokit.client.filesystem.FilesystemUnwatchParams
 import io.github.cokit.client.filesystem.FilesystemWriteFileParams
 import io.github.cokit.client.filesystem.FilesystemWatchParams
 import io.github.cokit.client.filesystem.FilesystemWatchResult
+import io.github.cokit.client.process.ProcessKillParams
+import io.github.cokit.client.process.ProcessResizePtyParams
+import io.github.cokit.client.process.ProcessSpawnParams
+import io.github.cokit.client.process.ProcessWriteStdinParams
 import kotlinx.serialization.KSerializer
 
 class CodexRpcMethod<P : Any, R : Any> internal constructor(
@@ -241,6 +245,37 @@ object CodexRpc {
         val Unwatch: CodexRpcMethod<FilesystemUnwatchParams, CodexRpcUnit> = CodexRpcMethod(
             method = "fs/unwatch",
             paramsSerializer = FilesystemUnwatchParams.serializer(),
+            resultSerializer = CodexRpcUnit.serializer(),
+            emptyResult = CodexRpcUnit,
+        )
+    }
+
+    @ExperimentalCodexApi
+    object Process {
+        val Spawn: CodexRpcMethod<ProcessSpawnParams, CodexRpcUnit> = CodexRpcMethod(
+            method = "process/spawn",
+            paramsSerializer = ProcessSpawnParams.serializer(),
+            resultSerializer = CodexRpcUnit.serializer(),
+            emptyResult = CodexRpcUnit,
+        )
+
+        val WriteStdin: CodexRpcMethod<ProcessWriteStdinParams, CodexRpcUnit> = CodexRpcMethod(
+            method = "process/writeStdin",
+            paramsSerializer = ProcessWriteStdinParams.serializer(),
+            resultSerializer = CodexRpcUnit.serializer(),
+            emptyResult = CodexRpcUnit,
+        )
+
+        val Kill: CodexRpcMethod<ProcessKillParams, CodexRpcUnit> = CodexRpcMethod(
+            method = "process/kill",
+            paramsSerializer = ProcessKillParams.serializer(),
+            resultSerializer = CodexRpcUnit.serializer(),
+            emptyResult = CodexRpcUnit,
+        )
+
+        val ResizePty: CodexRpcMethod<ProcessResizePtyParams, CodexRpcUnit> = CodexRpcMethod(
+            method = "process/resizePty",
+            paramsSerializer = ProcessResizePtyParams.serializer(),
             resultSerializer = CodexRpcUnit.serializer(),
             emptyResult = CodexRpcUnit,
         )

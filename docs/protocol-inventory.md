@@ -35,7 +35,7 @@ modeled coverage. They are compatibility behavior only.
 | Thread realtime | experimental | `thread/realtime/start`, `thread/realtime/appendAudio`, `thread/realtime/appendText`, `thread/realtime/stop` | Deferred. Realtime requires explicit experimental opt-in before CoKit should expose descriptors. |
 | Review | deferred | `review/start` | No typed descriptor yet. Review item notifications are also deferred. |
 | Sandboxed command execution | partial | `command/exec`, `command/exec/write`, `command/exec/resize`, `command/exec/terminate` | `CodexRpc.Command.Exec`, `WriteStdin`, `Resize`, and `Terminate` model the command request/control shapes from the `codex-cli 0.140.0` generated schema. Output notifications remain deferred. Approval handling for agent-driven command execution is tracked under server requests. |
-| Standalone process lifecycle | experimental | `process/spawn`, `process/writeStdin`, `process/resizePty`, `process/kill` | Deferred. Upstream marks this surface experimental and unsandboxed. |
+| Standalone process lifecycle | experimental | `process/spawn`, `process/writeStdin`, `process/resizePty`, `process/kill` | `CodexRpc.Process.Spawn`, `WriteStdin`, `ResizePty`, and `Kill` model the experimental unsandboxed process lifecycle descriptors behind `ExperimentalCodexApi`. |
 | Filesystem utilities | modeled | `fs/readFile`, `fs/writeFile`, `fs/createDirectory`, `fs/getMetadata`, `fs/readDirectory`, `fs/remove`, `fs/copy`, `fs/watch`, `fs/unwatch` | `CodexRpc.Filesystem.ReadFile`, `GetMetadata`, `ReadDirectory`, `WriteFile`, `CreateDirectory`, `Copy`, `Remove`, `Watch`, and `Unwatch` model host filesystem descriptors, including connection-scoped watch identifiers. |
 | Models and provider catalog | deferred | `model/list`, `modelProvider/capabilities/read` | No typed descriptors yet. |
 | Feature and permission catalog | experimental | `experimentalFeature/list`, `experimentalFeature/enablement/set`, `permissionProfile/list` | Deferred. Upstream marks permission profiles beta and feature enablement experimental. |
@@ -132,6 +132,10 @@ without updating the public inventory.
 | `CodexRpc.Filesystem.Remove` | `fs/remove` | Host filesystem mutation descriptor; group coverage is modeled. |
 | `CodexRpc.Filesystem.Watch` | `fs/watch` | Host filesystem watch descriptor; group coverage is modeled. |
 | `CodexRpc.Filesystem.Unwatch` | `fs/unwatch` | Host filesystem unwatch descriptor; group coverage is modeled. |
+| `CodexRpc.Process.Spawn` | `process/spawn` | Experimental unsandboxed process descriptor; group coverage remains experimental. |
+| `CodexRpc.Process.WriteStdin` | `process/writeStdin` | Experimental unsandboxed process stdin descriptor; group coverage remains experimental. |
+| `CodexRpc.Process.Kill` | `process/kill` | Experimental unsandboxed process termination descriptor; group coverage remains experimental. |
+| `CodexRpc.Process.ResizePty` | `process/resizePty` | Experimental unsandboxed process PTY resize descriptor; group coverage remains experimental. |
 
 ## Current Modeled Method Summary
 
@@ -169,6 +173,10 @@ Current public request descriptors:
 - `fs/remove`
 - `fs/watch`
 - `fs/unwatch`
+- `process/spawn`
+- `process/writeStdin`
+- `process/kill`
+- `process/resizePty`
 
 Current typed notification:
 

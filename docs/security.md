@@ -89,6 +89,16 @@ should choose sandbox policies deliberately, treat decoded command output as
 untrusted, and avoid passing secrets in argv, stdin, environment overrides,
 working directories, or captured output.
 
+`CodexRpc.Process.Spawn`, `WriteStdin`, `Kill`, and `ResizePty` expose
+experimental standalone process lifecycle methods. Upstream marks this surface
+unsandboxed: these descriptors target the app-server host directly and are not a
+replacement for sandboxed `command/exec`. Process handles are caller-supplied
+and connection-scoped; stdin chunks are base64-encoded by the caller before they
+cross the protocol. Applications should keep process APIs behind explicit user
+or policy decisions, avoid shell interpolation, avoid passing secrets in argv,
+stdin, environment overrides, working directories, or captured output, and treat
+all output and exit notifications as untrusted host data.
+
 `CodexRpc.Filesystem.ReadFile`, `GetMetadata`, and `ReadDirectory` inspect
 absolute paths on the app-server host, not paths on the Kotlin client process.
 `ReadFile` returns base64-encoded file contents, and `ReadDirectory` returns
