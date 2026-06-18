@@ -1,5 +1,7 @@
 package io.github.cokit.client
 
+import io.github.cokit.client.commands.CommandExecOutputStream
+import io.github.cokit.client.commands.CommandProcessId
 import io.github.cokit.protocol.CodexProtocolJson
 import io.github.cokit.protocol.JsonRpcId
 import io.github.cokit.protocol.JsonRpcNotification
@@ -115,6 +117,15 @@ sealed interface CodexNotification {
         val requestId: JsonRpcId,
     ) : CodexNotification {
         override val method: String = "serverRequest/resolved"
+    }
+
+    data class CommandExecOutputDelta(
+        val processId: CommandProcessId,
+        val stream: CommandExecOutputStream,
+        val deltaBase64: String,
+        val capReached: Boolean,
+    ) : CodexNotification {
+        override val method: String = "command/exec/outputDelta"
     }
 
     data class Unknown(
@@ -307,6 +318,19 @@ internal fun JsonRpcNotification.toCodexNotification(): CodexNotification {
                 CodexNotification.Unknown(method)
             }
         }
+        "command/exec/outputDelta" -> {
+            val payload = params.decodeNotificationParams<CommandExecOutputDeltaPayload>()
+            if (payload != null) {
+                CodexNotification.CommandExecOutputDelta(
+                    processId = payload.processId,
+                    stream = payload.stream,
+                    deltaBase64 = payload.deltaBase64,
+                    capReached = payload.capReached,
+                )
+            } else {
+                CodexNotification.Unknown(method)
+            }
+        }
         else -> CodexNotification.Unknown(method)
     }
 }
@@ -385,6 +409,14 @@ private data class ErrorPayload(
 private data class ServerRequestResolvedPayload(
     val threadId: ThreadId,
     val requestId: JsonRpcId,
+)
+
+@Serializable
+private data class CommandExecOutputDeltaPayload(
+    val processId: CommandProcessId,
+    val stream: CommandExecOutputStream,
+    val deltaBase64: String,
+    val capReached: Boolean,
 )
 
 private inline fun <reified T> JsonElement?.decodeNotificationParams(): T? {

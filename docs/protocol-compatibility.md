@@ -110,7 +110,7 @@ request descriptor count is exact.
 | Inventory section | `modeled` | `partial` | `deferred` | `experimental` | Exact current coverage |
 | --- | ---: | ---: | ---: | ---: | --- |
 | Request groups | 0 | 5 | 11 | 6 | 23 public `CodexRpc` request descriptors |
-| Notification groups | 3 | 4 | 10 | 7 | Not counted by this helper |
+| Notification groups | 4 | 4 | 9 | 7 | Not counted by this helper |
 | Server-request groups | 0 | 5 | 0 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
@@ -126,16 +126,20 @@ upstream surface today:
 - Notifications: `CodexNotification.ThreadStarted`, `ThreadStatusChanged`,
   `ThreadTokenUsageUpdated`, `TurnStarted`, `TurnCompleted`, `TurnFailed`,
   `ItemStarted`, `ItemCompleted`, `AgentMessageDelta`,
-  `ReasoningSummaryTextDelta`, `Warning`, `ConfigWarning`, `Error`, and
-  `ServerRequestResolved` are modeled. `TurnFailed` is decoded from upstream
-  `turn/completed` notifications with `turn.status == "failed"`. Item lifecycle
-  events expose a `ThreadItemSummary` compatibility wrapper for common rendering
-  fields.
+  `ReasoningSummaryTextDelta`, `Warning`, `ConfigWarning`, `Error`,
+  `ServerRequestResolved`, and `CommandExecOutputDelta` are modeled.
+  `TurnFailed` is decoded from upstream `turn/completed` notifications with
+  `turn.status == "failed"`. Item lifecycle events expose a `ThreadItemSummary`
+  compatibility wrapper for common rendering fields.
   Error notifications expose safe message fields; structured `codexErrorInfo`
   remains deferred until it has a typed compatibility model.
   `serverRequest/resolved` currently carries only `threadId` and `requestId`;
   CoKit preserves that schema shape instead of fabricating method or status
-  fields. Unknown notifications expose only the method name in the primary API.
+  fields. `command/exec/outputDelta` currently carries base64 stdout/stderr
+  chunks and `capReached`; command exit status remains part of the final
+  `command/exec` response, and command failures use JSON-RPC errors rather than
+  separate notifications. Unknown notifications expose only the method name in
+  the primary API.
 - Server requests: command execution approval, file-change approval, permission
   approval, tool user-input prompts, and MCP elicitations are modeled with typed
   handlers. Permission approvals return granted permission subsets instead of
@@ -150,8 +154,8 @@ descriptors:
 - Advanced thread APIs: loaded-thread listing, turn-item hydration, settings,
   memory mode, shell command, background terminals, rollback, realtime, and raw
   item injection.
-- Review and execution APIs: review start, command output notifications,
-  standalone process lifecycle, and filesystem utilities.
+- Review and execution APIs: review start, standalone process lifecycle, and
+  filesystem utilities.
 - Catalog and configuration APIs: model, model-provider capabilities,
   experimental feature flags, permission profiles, environments, collaboration
   modes, MCP status/resources/tools, config read/write/reload, Windows sandbox

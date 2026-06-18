@@ -48,6 +48,15 @@ data class CommandExecTerminateParams(
 
 @Serializable
 @JvmInline
+value class CommandExecOutputStream(val value: String) {
+    companion object {
+        val Stdout = CommandExecOutputStream("stdout")
+        val Stderr = CommandExecOutputStream("stderr")
+    }
+}
+
+@Serializable
+@JvmInline
 value class CommandProcessId(val value: String)
 
 @Serializable

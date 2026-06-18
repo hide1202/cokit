@@ -1,5 +1,7 @@
 package io.github.cokit.client
 
+import io.github.cokit.client.commands.CommandExecOutputStream
+import io.github.cokit.client.commands.CommandProcessId
 import io.github.cokit.protocol.JsonRpcNotification
 import io.github.cokit.protocol.JsonRpcId
 import kotlin.test.Test
@@ -347,6 +349,39 @@ class CodexNotificationTest {
 
         val stringIdResolved = assertIs<CodexNotification.ServerRequestResolved>(stringIdNotification)
         assertEquals(JsonRpcId.StringId("req_abc"), stringIdResolved.requestId)
+    }
+
+    @Test
+    fun decodesCommandExecOutputDeltaNotificationAsTypedModel() {
+        val stdoutNotification = JsonRpcNotification(
+            method = "command/exec/outputDelta",
+            params = buildJsonObject {
+                put("processId", "cmd_stream_1")
+                put("stream", "stdout")
+                put("deltaBase64", "bGluZSAxCg==")
+                put("capReached", false)
+            },
+        ).toCodexNotification()
+
+        val stdout = assertIs<CodexNotification.CommandExecOutputDelta>(stdoutNotification)
+        assertEquals(CommandProcessId("cmd_stream_1"), stdout.processId)
+        assertEquals(CommandExecOutputStream.Stdout, stdout.stream)
+        assertEquals("bGluZSAxCg==", stdout.deltaBase64)
+        assertEquals(false, stdout.capReached)
+
+        val stderrNotification = JsonRpcNotification(
+            method = "command/exec/outputDelta",
+            params = buildJsonObject {
+                put("processId", "cmd_stream_1")
+                put("stream", "stderr")
+                put("deltaBase64", "ZXJyb3IK")
+                put("capReached", true)
+            },
+        ).toCodexNotification()
+
+        val stderr = assertIs<CodexNotification.CommandExecOutputDelta>(stderrNotification)
+        assertEquals(CommandExecOutputStream.Stderr, stderr.stream)
+        assertEquals(true, stderr.capReached)
     }
 
     @Test

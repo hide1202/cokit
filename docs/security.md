@@ -82,9 +82,12 @@ output cap, process id, PTY size, and sandbox policy fields describe host-side
 execution only; they do not run commands in the Kotlin client process.
 `CodexRpc.Command.WriteStdin`, `Resize`, and `Terminate` target the same
 connection-scoped app-server process id supplied by `command/exec`; stdin chunks
-are base64-encoded by the caller before they cross the protocol. Callers should
-choose sandbox policies deliberately and should avoid passing secrets in argv,
-stdin, environment overrides, working directories, or captured output.
+are base64-encoded by the caller before they cross the protocol.
+`CodexNotification.CommandExecOutputDelta` exposes base64-encoded stdout and
+stderr chunks plus `capReached` when `outputBytesCap` truncates a stream. Callers
+should choose sandbox policies deliberately, treat decoded command output as
+untrusted, and avoid passing secrets in argv, stdin, environment overrides,
+working directories, or captured output.
 
 ## Secrets
 

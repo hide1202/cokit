@@ -66,7 +66,7 @@ modeled coverage. They are compatibility behavior only.
 | Reasoning streaming | partial | `item/reasoning/summaryTextDelta`, `item/reasoning/summaryPartAdded`, `item/reasoning/textDelta` | `CodexNotification.ReasoningSummaryTextDelta` models summary text streaming. Summary part boundaries and raw reasoning text remain deferred. |
 | Command execution item streaming | deferred | `item/commandExecution/outputDelta` | No typed notification yet. |
 | File change item streaming | deferred | `item/fileChange/patchUpdated`, `item/fileChange/outputDelta` | No typed notification yet. File-change approvals are deny-by-default as server requests. |
-| Command execution output | deferred | `command/exec/outputDelta` | No typed notification yet. |
+| Command execution output | modeled | `command/exec/outputDelta` | `CodexNotification.CommandExecOutputDelta` models base64 stdout/stderr chunks, connection-scoped process ids, and `capReached` truncation flags. Current upstream schema does not define separate command exit or error notifications. |
 | Process output and exit | experimental | `process/outputDelta`, `process/exited` | Deferred. |
 | Filesystem watch | deferred | `fs/changed` | No typed notification yet. |
 | Fuzzy file search | experimental | `fuzzyFileSearch/sessionUpdated`, `fuzzyFileSearch/sessionCompleted` | Deferred. |
@@ -167,6 +167,7 @@ Current typed notification:
 - `configWarning`
 - `error`
 - `serverRequest/resolved`
+- `command/exec/outputDelta`
 
 Current typed server request:
 
