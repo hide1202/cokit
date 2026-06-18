@@ -77,7 +77,7 @@ data class McpElicitationField(
     val type: McpElicitationFieldType,
     val title: String? = null,
     val description: String? = null,
-    val default: JsonElement? = null,
+    val default: CodexJsonPayload? = null,
     val format: String? = null,
     val enum: List<String>? = null,
     val enumNames: List<String>? = null,

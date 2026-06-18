@@ -453,8 +453,9 @@ Exit criteria:
 
 Goal: make the API safe to publish and maintain as upstream evolves.
 
-- Add binary/API inspection or source-level checks that prevent accidental
-  primary API exposure of `JsonElement` and JSON-RPC envelope types.
+- `checkPublicApiExposure` runs during `check` and prevents accidental primary
+  client API exposure of `JsonElement` and JSON-RPC envelope types. Use typed
+  models or `CodexJsonPayload` for documented compatibility fields.
 - Add high-rate notification, malformed message, oversized message, overload,
   retry, and shutdown tests across protocol, RPC, transport, and client modules.
 - Document retry behavior for app-server overload errors and connection

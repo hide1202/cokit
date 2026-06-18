@@ -64,6 +64,7 @@ class McpServerRequestTest {
         assertEquals(listOf("ticketId"), form.requestedSchema.required)
         assertEquals(McpElicitationFieldType.String, ticketId.type)
         assertEquals("Ticket ID", ticketId.title)
+        assertEquals("ABC-123", ticketId.default?.toJsonElement()?.jsonPrimitive?.content)
         assertEquals(3, ticketId.minLength)
 
         val response = fixture.transport.sent.last() as JsonRpcResponse
@@ -210,6 +211,7 @@ class McpServerRequestTest {
                         put("type", "string")
                         put("title", "Ticket ID")
                         put("description", "Issue or ticket identifier.")
+                        put("default", "ABC-123")
                         put("minLength", 3)
                     }
                 }

@@ -83,8 +83,50 @@ tasks.register("validateModuleBoundaries") {
     }
 }
 
+val publicApiSourceRoots = listOf(
+    "cokit-client/src/commonMain/kotlin",
+    "cokit-client/src/jvmMain/kotlin",
+).map { path -> layout.projectDirectory.dir(path) }
+
+val checkPublicApiExposure = tasks.register("checkPublicApiExposure") {
+    group = "verification"
+    description = "Checks primary client APIs do not expose raw JSON or JSON-RPC envelope types."
+
+    inputs.files(
+        publicApiSourceRoots.map { sourceRoot ->
+            fileTree(sourceRoot) {
+                include("**/*.kt")
+            }
+        },
+    )
+
+    doLast {
+        val sourceFiles = publicApiSourceRoots
+            .map { sourceRoot -> sourceRoot.asFile }
+            .filter { sourceRoot -> sourceRoot.isDirectory }
+            .flatMap { sourceRoot ->
+                sourceRoot.walkTopDown()
+                    .filter { file -> file.isFile && file.extension == "kt" }
+                    .toList()
+            }
+        val violations = CokitPublicApiChecks.findViolations(sourceFiles, rootDir)
+        check(violations.isEmpty()) {
+            buildString {
+                appendLine("Primary client APIs must not expose raw JSON or JSON-RPC envelope types.")
+                appendLine("Use typed models or CodexJsonPayload for documented compatibility fields.")
+                violations.forEach { violation ->
+                    appendLine(
+                        "${violation.relativePath}:${violation.lineNumber}: ${violation.typeName}: ${violation.line}",
+                    )
+                }
+            }
+        }
+    }
+}
+
 subprojects {
     tasks.matching { task -> task.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("validateModuleBoundaries"))
+        dependsOn(checkPublicApiExposure)
     }
 }
