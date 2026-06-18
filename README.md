@@ -77,8 +77,8 @@ Show the included sample CLI help:
 ./gradlew :cokit-sample-cli:run --args="--help"
 ```
 
-Start a real app-server thread and turn with default values when `codex` is
-installed locally:
+Start a real app-server thread, send the default message, and stream the
+assistant response when `codex` is installed locally:
 
 ```bash
 ./gradlew :cokit-sample-cli:run
@@ -93,6 +93,11 @@ Override the default app-server host path or message when needed:
 The sample uses `StdioCodexTransport` defaults. Set `COKIT_CODEX_COMMAND` to a
 whitespace-separated command when testing a different local app-server
 executable.
+
+The command prints the created thread and turn ids, then streams assistant text
+from typed `CodexNotification.AgentMessageDelta` events. If the turn completes
+without assistant text, the sample reports that no assistant message was
+produced; if the turn fails, it exits with the app-server error message.
 
 ## Upstream Protocol
 

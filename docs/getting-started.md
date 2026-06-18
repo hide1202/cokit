@@ -21,8 +21,9 @@ The repository includes a small JVM CLI sample in `:cokit-sample-cli`.
 ./gradlew :cokit-sample-cli:run --args="--help"
 ```
 
-When `codex` is installed locally, the sample can start a real app-server thread
-and turn over stdio without requiring arguments:
+When `codex` is installed locally, the sample can start a real app-server
+thread, send the default message, and stream the assistant response over stdio
+without requiring arguments:
 
 ```bash
 ./gradlew :cokit-sample-cli:run
@@ -37,6 +38,11 @@ Optional `--cwd` and `--message` flags can override the defaults:
 The sample uses CoKit's default stdio app-server transport. Use
 `COKIT_CODEX_COMMAND` only when you need to point it at another local command
 during development.
+
+The command prints the created thread and turn ids before streaming assistant
+text from typed `CodexNotification.AgentMessageDelta` events. A completed turn
+with no assistant text is reported explicitly, and failed turns exit with the
+app-server error message.
 
 ## Connect To app-server
 
