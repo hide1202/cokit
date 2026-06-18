@@ -89,6 +89,13 @@ should choose sandbox policies deliberately, treat decoded command output as
 untrusted, and avoid passing secrets in argv, stdin, environment overrides,
 working directories, or captured output.
 
+`CodexRpc.Filesystem.ReadFile`, `GetMetadata`, and `ReadDirectory` inspect
+absolute paths on the app-server host, not paths on the Kotlin client process.
+`ReadFile` returns base64-encoded file contents, and `ReadDirectory` returns
+direct child names rather than absolute paths. Applications should treat all
+returned paths, metadata, and file contents as untrusted host data and avoid
+requesting private files unless an explicit user or policy decision allows it.
+
 ## Secrets
 
 CoKit should not log secrets by default. Consumers should avoid logging:

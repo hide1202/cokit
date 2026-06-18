@@ -5,6 +5,12 @@ import io.github.cokit.client.commands.CommandExecResizeParams
 import io.github.cokit.client.commands.CommandExecResult
 import io.github.cokit.client.commands.CommandExecTerminateParams
 import io.github.cokit.client.commands.CommandExecWriteParams
+import io.github.cokit.client.filesystem.FilesystemGetMetadataParams
+import io.github.cokit.client.filesystem.FilesystemGetMetadataResult
+import io.github.cokit.client.filesystem.FilesystemReadDirectoryParams
+import io.github.cokit.client.filesystem.FilesystemReadDirectoryResult
+import io.github.cokit.client.filesystem.FilesystemReadFileParams
+import io.github.cokit.client.filesystem.FilesystemReadFileResult
 import kotlinx.serialization.KSerializer
 
 class CodexRpcMethod<P : Any, R : Any> internal constructor(
@@ -169,5 +175,26 @@ object CodexRpc {
             resultSerializer = CodexRpcUnit.serializer(),
             emptyResult = CodexRpcUnit,
         )
+    }
+
+    object Filesystem {
+        val ReadFile: CodexRpcMethod<FilesystemReadFileParams, FilesystemReadFileResult> = CodexRpcMethod(
+            method = "fs/readFile",
+            paramsSerializer = FilesystemReadFileParams.serializer(),
+            resultSerializer = FilesystemReadFileResult.serializer(),
+        )
+
+        val GetMetadata: CodexRpcMethod<FilesystemGetMetadataParams, FilesystemGetMetadataResult> = CodexRpcMethod(
+            method = "fs/getMetadata",
+            paramsSerializer = FilesystemGetMetadataParams.serializer(),
+            resultSerializer = FilesystemGetMetadataResult.serializer(),
+        )
+
+        val ReadDirectory: CodexRpcMethod<FilesystemReadDirectoryParams, FilesystemReadDirectoryResult> =
+            CodexRpcMethod(
+                method = "fs/readDirectory",
+                paramsSerializer = FilesystemReadDirectoryParams.serializer(),
+                resultSerializer = FilesystemReadDirectoryResult.serializer(),
+            )
     }
 }

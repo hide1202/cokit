@@ -73,7 +73,7 @@ server-request surfaces by current CoKit coverage:
 [Protocol Inventory](protocol-inventory.md).
 
 The current `CodexRpc` descriptor catalog covers the core modeled thread, turn,
-and command request methods:
+command, and read-only filesystem request methods:
 
 - `thread/start`
 - `thread/resume`
@@ -98,6 +98,9 @@ and command request methods:
 - `command/exec/write`
 - `command/exec/resize`
 - `command/exec/terminate`
+- `fs/readFile`
+- `fs/getMetadata`
+- `fs/readDirectory`
 
 `CodexRpcClient.connect()` also performs the required `initialize` request and
 `initialized` notification internally.
@@ -109,15 +112,15 @@ request descriptor count is exact.
 <!-- codex-rpc-coverage:start -->
 | Inventory section | `modeled` | `partial` | `deferred` | `experimental` | Exact current coverage |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Request groups | 0 | 5 | 11 | 6 | 23 public `CodexRpc` request descriptors |
+| Request groups | 0 | 6 | 10 | 6 | 26 public `CodexRpc` request descriptors |
 | Notification groups | 4 | 4 | 9 | 7 | Not counted by this helper |
 | Server-request groups | 0 | 5 | 0 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
 The upstream README currently documents roughly 100 request methods when the
 main API overview, auth/account surface, and initialization handshake are counted
-together. On that basis, CoKit's typed request descriptor coverage is about 23%
-of the full upstream request surface, or about 24% if the internal initialize
+together. On that basis, CoKit's typed request descriptor coverage is about 26%
+of the full upstream request surface, or about 27% if the internal initialize
 handshake is counted as implemented coverage.
 
 Typed notification and server-request coverage is intentionally smaller than the
@@ -154,8 +157,8 @@ descriptors:
 - Advanced thread APIs: loaded-thread listing, turn-item hydration, settings,
   memory mode, shell command, background terminals, rollback, realtime, and raw
   item injection.
-- Review and execution APIs: review start, standalone process lifecycle, and
-  filesystem utilities.
+- Review and execution APIs: review start, standalone process lifecycle,
+  filesystem mutation/watch utilities.
 - Catalog and configuration APIs: model, model-provider capabilities,
   experimental feature flags, permission profiles, environments, collaboration
   modes, MCP status/resources/tools, config read/write/reload, Windows sandbox
