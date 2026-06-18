@@ -140,15 +140,15 @@ request descriptor count is exact.
 <!-- codex-rpc-coverage:start -->
 | Inventory section | `modeled` | `partial` | `deferred` | `experimental` | Exact current coverage |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Request groups | 3 | 8 | 6 | 5 | 48 public `CodexRpc` request descriptors |
+| Request groups | 4 | 8 | 5 | 5 | 50 public `CodexRpc` request descriptors |
 | Notification groups | 5 | 4 | 8 | 7 | Not counted by this helper |
 | Server-request groups | 0 | 5 | 0 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
 The upstream README currently documents roughly 100 request methods when the
 main API overview, auth/account surface, and initialization handshake are counted
-together. On that basis, CoKit's typed request descriptor coverage is about 48%
-of the full upstream request surface, or about 49% if the internal initialize
+together. On that basis, CoKit's typed request descriptor coverage is about 50%
+of the full upstream request surface, or about 51% if the internal initialize
 handshake is counted as implemented coverage.
 
 Typed notification and server-request coverage is intentionally smaller than the
@@ -208,14 +208,21 @@ experimental and require `ExperimentalCodexApi`; current `codex-cli 0.140.0`
 schema defines collaboration mode listing and environment registration, but not
 environment list/read or collaboration mode read descriptors.
 
-Skills APIs are partially modeled as data-oriented protocol descriptors.
+Skills and hooks APIs are modeled as data-oriented protocol descriptors.
 `CodexRpc.Skills.List` returns per-cwd skill metadata, parse errors, dependency
 declarations, and optional interface metadata without loading or executing skill
 content in CoKit. `CodexRpc.Skills.SetExtraRoots` updates the app-server skill
 search roots, and `CodexRpc.Skills.WriteConfig` changes a skill's enabled state
 by name or path. Current `codex-cli 0.140.0` schema defines
-`skills/config/write` but not a `skills/config/read` request; `hooks/list`
-remains deferred.
+`skills/config/write` but not a `skills/config/read` request.
+`CodexRpc.Hooks.List` returns per-cwd hook metadata, warnings, and parse errors
+without executing hook handlers in CoKit.
+
+App catalog APIs are partially modeled. `CodexRpc.Apps.List` exposes the
+experimental `app/list` page shape behind `ExperimentalCodexApi`, including
+branding, labels, enabled/accessibility flags, and optional app metadata. CoKit
+does not render app UI, authenticate apps, install plugins, or invoke app
+behavior through this descriptor.
 
 The following upstream request groups are not yet modeled as primary typed
 descriptors:
@@ -226,8 +233,8 @@ descriptors:
 - Catalog and configuration APIs: experimental feature flags, MCP
   status/resources/tools, config requirements, Windows sandbox setup, feedback
   upload, and external-agent import.
-- Hooks, apps, marketplaces, and plugins: hooks list, marketplace operations,
-  plugin list/install/read/uninstall, plugin skill reads, and app list.
+- Marketplaces and plugins: marketplace operations, plugin
+  list/install/read/uninstall, and plugin skill reads.
 - Remote control APIs: enable, disable, status, pairing, client list, and client
   revoke.
 - Auth/account APIs: account read, login, logout, rate limits, usage, and add

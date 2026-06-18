@@ -140,6 +140,15 @@ should show root paths, skill selectors, and enablement changes to a user or
 policy engine before calling these mutation descriptors, especially when extra
 roots point outside the active project.
 
+`CodexRpc.Hooks.List` reads hook metadata, source paths, warnings, and parse
+errors for app-server host working directories. Hook commands, matchers, plugin
+ids, hashes, and status messages are untrusted catalog data in CoKit; the
+library does not execute hook handlers or make trust decisions from this
+descriptor. `CodexRpc.Apps.List` is experimental and reads app catalog metadata,
+branding, labels, install URLs, and plugin display names for presentation by the
+calling application. CoKit does not render app UI, authenticate apps, install
+plugins, or invoke app behavior through the catalog descriptor.
+
 ## Secrets
 
 CoKit should not log secrets by default. Consumers should avoid logging:

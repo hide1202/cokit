@@ -15,6 +15,10 @@ import io.github.cokit.client.environment.CollaborationModeListResult
 import io.github.cokit.client.environment.EnvironmentAddParams
 import io.github.cokit.client.environment.PermissionProfileListParams
 import io.github.cokit.client.environment.PermissionProfileListResult
+import io.github.cokit.client.extensions.AppsListParams
+import io.github.cokit.client.extensions.AppsListResult
+import io.github.cokit.client.extensions.HooksListParams
+import io.github.cokit.client.extensions.HooksListResult
 import io.github.cokit.client.filesystem.FilesystemGetMetadataParams
 import io.github.cokit.client.filesystem.FilesystemGetMetadataResult
 import io.github.cokit.client.filesystem.FilesystemCopyParams
@@ -367,6 +371,23 @@ object CodexRpc {
                 paramsSerializer = SkillConfigWriteParams.serializer(),
                 resultSerializer = SkillConfigWriteResult.serializer(),
             )
+    }
+
+    object Hooks {
+        val List: CodexRpcMethod<HooksListParams, HooksListResult> = CodexRpcMethod(
+            method = "hooks/list",
+            paramsSerializer = HooksListParams.serializer(),
+            resultSerializer = HooksListResult.serializer(),
+        )
+    }
+
+    @ExperimentalCodexApi
+    object Apps {
+        val List: CodexRpcMethod<AppsListParams, AppsListResult> = CodexRpcMethod(
+            method = "app/list",
+            paramsSerializer = AppsListParams.serializer(),
+            resultSerializer = AppsListResult.serializer(),
+        )
     }
 
     object PermissionProfile {

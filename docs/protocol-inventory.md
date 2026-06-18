@@ -40,8 +40,8 @@ modeled coverage. They are compatibility behavior only.
 | Models and provider catalog | modeled | `model/list`, `modelProvider/capabilities/read` | `CodexRpc.Model.List` models typed catalog entries, cursors, display names, reasoning options, service tiers, and input modalities. `CodexRpc.Model.ReadProviderCapabilities` models provider-level web search, image generation, and namespace-tool capability flags. |
 | Feature and permission catalog | partial | `experimentalFeature/list`, `experimentalFeature/enablement/set`, `permissionProfile/list` | `CodexRpc.PermissionProfile.List` models permission profile ids, descriptions, optional cwd scoping, and pagination. Experimental feature list and enablement methods remain deferred. |
 | Environments and collaboration modes | experimental | `environment/add`, `collaborationMode/list` | `CodexRpc.Environment.Add` and `CodexRpc.CollaborationMode.List` model the current `codex-cli 0.140.0` experimental schema behind `ExperimentalCodexApi`. The current schema does not define environment list/read or collaboration mode read descriptors. |
-| Skills and hooks | partial | `skills/list`, `skills/extraRoots/set`, `skills/config/write`, `hooks/list` | `CodexRpc.Skills.List`, `SetExtraRoots`, and `WriteConfig` model current skills catalog, extra-root, and config-write descriptors. `hooks/list` remains deferred. Current `codex-cli 0.140.0` schema does not define a `skills/config/read` request. |
-| Apps, marketplaces, and plugins | deferred | `app/list`, `marketplace/add`, `marketplace/remove`, `marketplace/upgrade`, `plugin/list`, `plugin/installed`, `plugin/read`, `plugin/skill/read`, `plugin/install`, `plugin/uninstall` | No typed descriptors yet. Turn input mentions model app and plugin invocation payloads, but catalog, install, auth, and marketplace APIs are deferred. Plugin APIs marked under development upstream are treated as experimental. |
+| Skills and hooks | modeled | `skills/list`, `skills/extraRoots/set`, `skills/config/write`, `hooks/list` | `CodexRpc.Skills.List`, `SetExtraRoots`, and `WriteConfig` model current skills catalog, extra-root, and config-write descriptors. `CodexRpc.Hooks.List` models hook metadata, source, enabled state, trust status, warnings, and parse errors. Current `codex-cli 0.140.0` schema does not define a `skills/config/read` request. |
+| Apps, marketplaces, and plugins | partial | `app/list`, `marketplace/add`, `marketplace/remove`, `marketplace/upgrade`, `plugin/list`, `plugin/installed`, `plugin/read`, `plugin/skill/read`, `plugin/install`, `plugin/uninstall` | `CodexRpc.Apps.List` models the experimental app catalog page shape behind `ExperimentalCodexApi`, including branding and optional app metadata. Marketplace and plugin descriptors remain deferred. Plugin APIs marked under development upstream are treated as experimental. |
 | MCP APIs | deferred | `mcpServer/oauth/login`, `config/mcpServer/reload`, `mcpServerStatus/list`, `mcpServer/resource/read`, `mcpServer/tool/call` | No typed descriptors yet. Server-initiated MCP elicitation is tracked under server requests. |
 | Windows sandbox setup | deferred | `windowsSandbox/setupStart` | No typed descriptor yet. |
 | Feedback upload | deferred | `feedback/upload` | No typed descriptor yet. |
@@ -142,9 +142,11 @@ without updating the public inventory.
 | `CodexRpc.Config.Read` | `config/read` | Effective config read descriptor; config group coverage remains partial. |
 | `CodexRpc.Config.WriteValue` | `config/value/write` | Single config value write descriptor; config group coverage remains partial. |
 | `CodexRpc.Config.BatchWrite` | `config/batchWrite` | Batch config write descriptor with reload flag; config group coverage remains partial. |
-| `CodexRpc.Skills.List` | `skills/list` | Skills catalog descriptor; skills and hooks coverage remains partial. |
-| `CodexRpc.Skills.SetExtraRoots` | `skills/extraRoots/set` | Extra skill roots descriptor; skills and hooks coverage remains partial. |
-| `CodexRpc.Skills.WriteConfig` | `skills/config/write` | Skill enablement config descriptor; skills and hooks coverage remains partial. |
+| `CodexRpc.Skills.List` | `skills/list` | Skills catalog descriptor; skills and hooks coverage is modeled. |
+| `CodexRpc.Skills.SetExtraRoots` | `skills/extraRoots/set` | Extra skill roots descriptor; skills and hooks coverage is modeled. |
+| `CodexRpc.Skills.WriteConfig` | `skills/config/write` | Skill enablement config descriptor; skills and hooks coverage is modeled. |
+| `CodexRpc.Hooks.List` | `hooks/list` | Hook catalog descriptor; skills and hooks coverage is modeled. |
+| `CodexRpc.Apps.List` | `app/list` | Experimental app catalog descriptor; apps, marketplaces, and plugins coverage remains partial. |
 | `CodexRpc.PermissionProfile.List` | `permissionProfile/list` | Permission profile catalog descriptor; feature and permission catalog coverage remains partial. |
 | `CodexRpc.CollaborationMode.List` | `collaborationMode/list` | Experimental collaboration mode descriptor; group coverage remains experimental. |
 | `CodexRpc.Environment.Add` | `environment/add` | Experimental environment registration descriptor; group coverage remains experimental. |
@@ -198,6 +200,8 @@ Current public request descriptors:
 - `skills/list`
 - `skills/extraRoots/set`
 - `skills/config/write`
+- `hooks/list`
+- `app/list`
 - `permissionProfile/list`
 - `collaborationMode/list`
 - `environment/add`
