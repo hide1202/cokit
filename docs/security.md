@@ -118,6 +118,18 @@ contents or an event-kind field. Applications should treat changed paths as
 untrusted host data, debounce or re-read state as needed, and unwatch paths when
 the subscription is no longer needed.
 
+`CodexRpc.Config.Read` reads the effective app-server configuration for an
+optional host `cwd` and may include layer metadata when requested. CoKit keeps
+arbitrary config values behind `ConfigValue`, which wraps `CodexJsonPayload`,
+because the upstream config object is intentionally broad and forward
+compatible. `CodexRpc.Config.WriteValue` and `BatchWrite` mutate the app-server
+host config file selected by app-server or by an explicit `filePath`.
+`BatchWrite.reloadUserConfig` asks app-server to hot-reload the updated user
+config into loaded threads after writing. Exposing these descriptors does not
+approve config edits or policy changes; applications should show the target key
+path, file path, merge strategy, expected version, and reload behavior to a user
+or policy engine before calling them.
+
 ## Secrets
 
 CoKit should not log secrets by default. Consumers should avoid logging:

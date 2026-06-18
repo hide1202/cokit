@@ -5,6 +5,11 @@ import io.github.cokit.client.commands.CommandExecResizeParams
 import io.github.cokit.client.commands.CommandExecResult
 import io.github.cokit.client.commands.CommandExecTerminateParams
 import io.github.cokit.client.commands.CommandExecWriteParams
+import io.github.cokit.client.config.ConfigBatchWriteParams
+import io.github.cokit.client.config.ConfigReadParams
+import io.github.cokit.client.config.ConfigReadResult
+import io.github.cokit.client.config.ConfigValueWriteParams
+import io.github.cokit.client.config.ConfigWriteResult
 import io.github.cokit.client.filesystem.FilesystemGetMetadataParams
 import io.github.cokit.client.filesystem.FilesystemGetMetadataResult
 import io.github.cokit.client.filesystem.FilesystemCopyParams
@@ -309,5 +314,25 @@ object CodexRpc {
                 paramsSerializer = ModelProviderCapabilitiesReadParams.serializer(),
                 resultSerializer = ModelProviderCapabilities.serializer(),
             )
+    }
+
+    object Config {
+        val Read: CodexRpcMethod<ConfigReadParams, ConfigReadResult> = CodexRpcMethod(
+            method = "config/read",
+            paramsSerializer = ConfigReadParams.serializer(),
+            resultSerializer = ConfigReadResult.serializer(),
+        )
+
+        val WriteValue: CodexRpcMethod<ConfigValueWriteParams, ConfigWriteResult> = CodexRpcMethod(
+            method = "config/value/write",
+            paramsSerializer = ConfigValueWriteParams.serializer(),
+            resultSerializer = ConfigWriteResult.serializer(),
+        )
+
+        val BatchWrite: CodexRpcMethod<ConfigBatchWriteParams, ConfigWriteResult> = CodexRpcMethod(
+            method = "config/batchWrite",
+            paramsSerializer = ConfigBatchWriteParams.serializer(),
+            resultSerializer = ConfigWriteResult.serializer(),
+        )
     }
 }

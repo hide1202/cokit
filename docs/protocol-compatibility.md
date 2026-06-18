@@ -77,8 +77,8 @@ server-request surfaces by current CoKit coverage:
 [Protocol Inventory](protocol-inventory.md).
 
 The current `CodexRpc` descriptor catalog covers the core modeled thread, turn,
-command, filesystem, review, model catalog, and experimental standalone process
-request methods:
+command, filesystem, review, model catalog, config, and experimental standalone
+process request methods:
 
 - `thread/start`
 - `thread/resume`
@@ -119,6 +119,9 @@ request methods:
 - `review/start`
 - `model/list`
 - `modelProvider/capabilities/read`
+- `config/read`
+- `config/value/write`
+- `config/batchWrite`
 
 `CodexRpcClient.connect()` also performs the required `initialize` request and
 `initialized` notification internally.
@@ -130,15 +133,15 @@ request descriptor count is exact.
 <!-- codex-rpc-coverage:start -->
 | Inventory section | `modeled` | `partial` | `deferred` | `experimental` | Exact current coverage |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Request groups | 3 | 5 | 8 | 6 | 39 public `CodexRpc` request descriptors |
+| Request groups | 3 | 6 | 7 | 6 | 42 public `CodexRpc` request descriptors |
 | Notification groups | 5 | 4 | 8 | 7 | Not counted by this helper |
 | Server-request groups | 0 | 5 | 0 | 2 | Not counted by this helper |
 <!-- codex-rpc-coverage:end -->
 
 The upstream README currently documents roughly 100 request methods when the
 main API overview, auth/account surface, and initialization handshake are counted
-together. On that basis, CoKit's typed request descriptor coverage is about 39%
-of the full upstream request surface, or about 40% if the internal initialize
+together. On that basis, CoKit's typed request descriptor coverage is about 42%
+of the full upstream request surface, or about 43% if the internal initialize
 handshake is counted as implemented coverage.
 
 Typed notification and server-request coverage is intentionally smaller than the
@@ -182,6 +185,14 @@ reasoning options, input modalities, service tiers, and pagination cursors.
 `CodexRpc.Model.ReadProviderCapabilities` exposes provider feature flags for web
 search, image generation, and namespace tools without adding UI policy.
 
+Config read and write APIs are partially modeled. `CodexRpc.Config.Read` returns
+the effective app-server config plus optional layer metadata, while keeping
+arbitrary config values behind `ConfigValue` and `CodexJsonPayload`.
+`CodexRpc.Config.WriteValue` and `BatchWrite` expose key-path edits, merge
+strategy, expected-version checks, explicit file paths, and the batch
+`reloadUserConfig` flag. `configRequirements/read` remains deferred until the
+managed-policy models are introduced.
+
 The following upstream request groups are not yet modeled as primary typed
 descriptors:
 
@@ -190,8 +201,8 @@ descriptors:
   item injection.
 - Catalog and configuration APIs: experimental feature flags, permission
   profiles, environments, collaboration modes, MCP status/resources/tools,
-  config read/write/reload, Windows sandbox setup, feedback upload, and
-  external-agent import.
+  config requirements, Windows sandbox setup, feedback upload, and external-agent
+  import.
 - Skills, hooks, apps, and plugins: skills list/config/extra roots, hooks list,
   marketplace operations, plugin list/install/read/uninstall, and app list.
 - Remote control APIs: enable, disable, status, pairing, client list, and client

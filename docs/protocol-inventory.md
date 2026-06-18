@@ -45,7 +45,7 @@ modeled coverage. They are compatibility behavior only.
 | MCP APIs | deferred | `mcpServer/oauth/login`, `config/mcpServer/reload`, `mcpServerStatus/list`, `mcpServer/resource/read`, `mcpServer/tool/call` | No typed descriptors yet. Server-initiated MCP elicitation is tracked under server requests. |
 | Windows sandbox setup | deferred | `windowsSandbox/setupStart` | No typed descriptor yet. |
 | Feedback upload | deferred | `feedback/upload` | No typed descriptor yet. |
-| Config read and write | deferred | `config/read`, `config/value/write`, `config/batchWrite`, `configRequirements/read` | No typed descriptors yet. Managed-policy models should be added before broad config APIs. |
+| Config read and write | partial | `config/read`, `config/value/write`, `config/batchWrite`, `configRequirements/read` | `CodexRpc.Config.Read`, `WriteValue`, and `BatchWrite` model effective config reads, single value writes, batch writes, and batch write reload flags. Arbitrary config values stay behind `ConfigValue` and `CodexJsonPayload`. `configRequirements/read` remains deferred for managed-policy models. |
 | External agent migration | deferred | `externalAgentConfig/detect`, `externalAgentConfig/import` | No typed descriptors yet. |
 | Remote control | experimental | `remoteControl/enable`, `remoteControl/disable`, `remoteControl/status/read`, `remoteControl/pairing/start`, `remoteControl/pairing/status`, `remoteControl/client/list`, `remoteControl/client/revoke` | Deferred. Remote-control methods require explicit experimental opt-in and trust-boundary documentation. |
 | Tool user-input utility | experimental | `tool/requestUserInput` | Deferred. This is distinct from the server-initiated `item/tool/requestUserInput` flow. |
@@ -139,6 +139,9 @@ without updating the public inventory.
 | `CodexRpc.Review.Start` | `review/start` | Review start descriptor; group coverage is modeled without review UI. |
 | `CodexRpc.Model.List` | `model/list` | Read-only model catalog descriptor; group coverage is modeled. |
 | `CodexRpc.Model.ReadProviderCapabilities` | `modelProvider/capabilities/read` | Provider capability descriptor; group coverage is modeled. |
+| `CodexRpc.Config.Read` | `config/read` | Effective config read descriptor; config group coverage remains partial. |
+| `CodexRpc.Config.WriteValue` | `config/value/write` | Single config value write descriptor; config group coverage remains partial. |
+| `CodexRpc.Config.BatchWrite` | `config/batchWrite` | Batch config write descriptor with reload flag; config group coverage remains partial. |
 
 ## Current Modeled Method Summary
 
@@ -183,6 +186,9 @@ Current public request descriptors:
 - `review/start`
 - `model/list`
 - `modelProvider/capabilities/read`
+- `config/read`
+- `config/value/write`
+- `config/batchWrite`
 
 Current typed notification:
 
