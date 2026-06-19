@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -67,6 +68,22 @@ class JsonRpcSessionTest {
         val error = assertIs<CancellationException>(result.await().exceptionOrNull())
         assertEquals("JSON-RPC session closed", error.message)
         assertEquals(1, transport.closeCount)
+    }
+
+    @Test
+    fun requestAfterCloseFailsBeforeTransportSend() = runTest {
+        val transport = FakeJsonRpcTransport()
+        val session = JsonRpcSession(transport, backgroundScope)
+        session.close()
+
+        val error = assertFailsWith<CancellationException> {
+            withTimeout(100) {
+                session.request("model/list", JsonObject(emptyMap()))
+            }
+        }
+
+        assertEquals("JSON-RPC session closed", error.message)
+        assertTrue(transport.sent.isEmpty())
     }
 
     @Test

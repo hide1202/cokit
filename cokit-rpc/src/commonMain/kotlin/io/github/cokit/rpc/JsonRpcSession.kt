@@ -53,6 +53,7 @@ class JsonRpcSession(
     val serverRequests: SharedFlow<JsonRpcRequest> = mutableServerRequests
 
     suspend fun notify(method: String) {
+        requireOpen()
         val message = JsonRpcNotification(method = method)
         requireWithinMessageLimit(message)
         transport.send(message)
@@ -72,13 +73,20 @@ class JsonRpcSession(
         requireWithinMessageLimit(message)
         val deferred = CompletableDeferred<JsonElementResult>()
         mutex.withLock {
+            if (closed) throw closedCancellationException()
             pendingRequests[id] = deferred
         }
-        transport.send(message)
+        try {
+            transport.send(message)
+        } catch (error: Throwable) {
+            cancelPending(id, error)
+            throw error
+        }
         return deferred.await()
     }
 
     suspend fun sendResponse(response: JsonRpcResponse) {
+        requireOpen()
         requireWithinMessageLimit(response)
         transport.send(response)
     }
@@ -88,7 +96,14 @@ class JsonRpcSession(
     }
 
     private suspend fun nextId(): JsonRpcId = mutex.withLock {
+        if (closed) throw closedCancellationException()
         JsonRpcId.Number(nextRequestId++)
+    }
+
+    private suspend fun requireOpen() {
+        mutex.withLock {
+            if (closed) throw closedCancellationException()
+        }
     }
 
     private suspend fun routeIncoming(message: JsonRpcMessage) {
@@ -113,6 +128,13 @@ class JsonRpcSession(
         }
     }
 
+    private suspend fun cancelPending(id: JsonRpcId, error: Throwable) {
+        val deferred = mutex.withLock {
+            pendingRequests.remove(id)
+        } ?: return
+        deferred.completeExceptionally(error)
+    }
+
     private suspend fun cancelPending(error: Throwable) {
         val requests = mutex.withLock {
             pendingRequests.values.toList().also { pendingRequests.clear() }
@@ -125,7 +147,7 @@ class JsonRpcSession(
         closed = true
         collectorJob.cancel()
         transport.close()
-        val cancellation = CancellationException("JSON-RPC session closed")
+        val cancellation = closedCancellationException()
         pendingRequests.values.forEach { it.completeExceptionally(cancellation) }
         pendingRequests.clear()
     }
@@ -144,6 +166,9 @@ class JsonRpcSession(
         const val DEFAULT_MAX_MESSAGE_BYTES: Int = 16 * 1024 * 1024
     }
 }
+
+private fun closedCancellationException(): CancellationException =
+    CancellationException("JSON-RPC session closed")
 
 typealias JsonElementResult = kotlinx.serialization.json.JsonElement?
 
