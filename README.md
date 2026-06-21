@@ -26,6 +26,8 @@ for the current coverage snapshot and implementation roadmap.
 
 ## Modules
 
+Published library artifacts use the `io.github.vupoint.cokit` group and include:
+
 - `cokit-protocol`: JSON-RPC messages, protocol serializers, and schema
   metadata. This module does not depend on client, runtime, or transport code.
 - `cokit-rpc`: request correlation, notification routing, and server request
@@ -36,8 +38,12 @@ for the current coverage snapshot and implementation roadmap.
 - `cokit-transport-websocket`: experimental WebSocket transport placeholder.
 - `cokit-testing`: fake transports and protocol test helpers for consumers and
   CoKit module tests.
+
+The repository also includes:
+
 - `cokit-sample-cli`: small JVM command-line sample that exercises the public
-  client and stdio transport APIs.
+  client and stdio transport APIs. This sample is not published as a Maven
+  Central library artifact.
 
 ## Basic Example
 

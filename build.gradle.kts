@@ -1,19 +1,62 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.maven.publish) apply false
     alias(libs.plugins.kover)
 }
 
 allprojects {
-    group = "io.github.vupoint.cokit"
-    version = "0.1.0-SNAPSHOT"
+    group = providers.gradleProperty("GROUP").orElse("io.github.vupoint.cokit").get()
+    version = providers.gradleProperty("VERSION_NAME")
+        .orElse(providers.gradleProperty("cokitVersion"))
+        .orElse("0.1.0-SNAPSHOT")
+        .get()
+}
+
+// Publishing is opt-out: every library subproject ships unless it is listed here.
+val nonPublishedProjectPaths = setOf(
+    ":cokit-sample-cli",
+)
+
+val publishedLibraryProjectPaths = provider {
+    subprojects
+        .map { subproject -> subproject.path }
+        .filterNot { projectPath -> projectPath in nonPublishedProjectPaths }
+        .toSet()
+}
+
+val publishedLibraryProjects = provider {
+    publishedLibraryProjectPaths.get().map { path -> project(path) }
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlinx.kover")
+}
+
+configure(publishedLibraryProjects.get()) {
+    apply(plugin = "com.vanniktech.maven.publish")
+
+    // Keep common Maven Central POM developer metadata in one root-owned block.
+    extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
+        pom {
+            developers {
+                developer {
+                    id.set("vupoint")
+                    name.set("Taegyeong Kim")
+                    email.set("vupoint@users.noreply.github.com")
+                    url.set("https://github.com/vupoint")
+                    organization.set("vupoint")
+                    organizationUrl.set("https://github.com/vupoint")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -34,6 +77,69 @@ tasks.register("coverage") {
     group = "verification"
     description = "Runs tests and generates aggregate Kover coverage reports."
     dependsOn("test", "koverHtmlReport", "koverXmlReport", "koverLog")
+}
+
+// CI should publish every library module as a set while keeping samples excluded.
+tasks.register("publishAndReleaseLibrariesToMavenCentral") {
+    group = "publishing"
+    description = "Publishes and automatically releases all CoKit library modules to Maven Central without publishing the sample CLI."
+    dependsOn(
+        publishedLibraryProjectPaths.get().map { projectPath ->
+            "$projectPath:publishAndReleaseToMavenCentral"
+        },
+    )
+}
+
+tasks.register("checkMavenCentralPublishingConfiguration") {
+    group = "verification"
+    description = "Checks Maven Central publication setup and sample exclusion."
+    dependsOn(
+        publishedLibraryProjectPaths.get().flatMap { projectPath ->
+            listOf(
+                "$projectPath:checkPomFileForJvmPublication",
+                "$projectPath:checkPomFileForKotlinMultiplatformPublication",
+            )
+        },
+    )
+
+    doLast {
+        val expected = publishedLibraryProjectPaths.get()
+        val actual = subprojects
+            .filter { subproject -> subproject.plugins.hasPlugin("com.vanniktech.maven.publish") }
+            .map { subproject -> subproject.path }
+            .toSet()
+
+        check(actual == expected) {
+            "Unexpected Maven publication projects. expected=${expected.sorted()} actual=${actual.sorted()}"
+        }
+        nonPublishedProjectPaths.forEach { projectPath ->
+            check(!project(projectPath).plugins.hasPlugin("com.vanniktech.maven.publish")) {
+                "$projectPath must stay excluded from Maven Central publications."
+            }
+        }
+
+        publishedLibraryProjects.get().forEach { publishedProject ->
+            check(publishedProject.plugins.hasPlugin("maven-publish")) {
+                "${publishedProject.path} must have maven-publish applied by the publishing plugin."
+            }
+            val publishing = publishedProject.extensions.getByType(PublishingExtension::class)
+            check(publishing.publications.withType(MavenPublication::class.java).isNotEmpty()) {
+                "${publishedProject.path} has no Maven publications."
+            }
+            publishing.publications.withType(MavenPublication::class.java).forEach { publication ->
+                check(!publication.pom.description.orNull.isNullOrBlank()) {
+                    "${publishedProject.path}:${publication.name} must set a POM description."
+                }
+                check(publication.pom.url.orNull == "https://github.com/vupoint/cokit") {
+                    "${publishedProject.path}:${publication.name} must set the project URL."
+                }
+            }
+        }
+
+        check(tasks.findByName("publishAndReleaseLibrariesToMavenCentral") != null) {
+            "Root publishAndReleaseLibrariesToMavenCentral task must be available for CI automation."
+        }
+    }
 }
 
 val allowedMainProjectDependencies = mapOf(

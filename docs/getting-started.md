@@ -2,7 +2,7 @@
 
 ## Install
 
-CoKit is not published yet. During local development, depend on project modules:
+During local development, depend on project modules:
 
 ```kotlin
 dependencies {
@@ -11,7 +11,15 @@ dependencies {
 }
 ```
 
-Future published artifacts are expected to use the `io.github.vupoint.cokit` group.
+Published library artifacts use the `io.github.vupoint.cokit` group. The sample
+CLI is a repository example and is not published as a library artifact.
+
+```kotlin
+dependencies {
+    implementation("io.github.vupoint.cokit:cokit-client:<version>")
+    implementation("io.github.vupoint.cokit:cokit-transport-stdio:<version>")
+}
+```
 
 ## Run The Sample CLI
 
