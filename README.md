@@ -47,6 +47,56 @@ The repository also includes:
   client and stdio transport APIs. This sample is not published as a Maven
   Central library artifact.
 
+## Gradle Setup
+
+CoKit artifacts are published to Maven Central. Make sure your build resolves
+dependencies from `mavenCentral()`:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+```
+
+Import the CoKit BOM once, then declare the CoKit modules you need without
+repeating the version. Replace `<version>` with the CoKit release you want to
+use:
+
+```kotlin
+dependencies {
+    implementation(platform("io.github.vupoint.cokit:cokit-bom:<version>"))
+    implementation("io.github.vupoint.cokit:cokit-client")
+    implementation("io.github.vupoint.cokit:cokit-transport-stdio")
+}
+```
+
+For Groovy DSL builds, use the same coordinates:
+
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("io.github.vupoint.cokit:cokit-bom:<version>")
+    implementation "io.github.vupoint.cokit:cokit-client"
+    implementation "io.github.vupoint.cokit:cokit-transport-stdio"
+}
+```
+
+The BOM also aligns JVM target artifacts such as `cokit-client-jvm` and
+`cokit-transport-stdio-jvm`. Gradle builds should normally use the base module
+coordinates above so Gradle module metadata can select the right variant.
+
+Add `cokit-testing` only to test configurations:
+
+```kotlin
+dependencies {
+    testImplementation(platform("io.github.vupoint.cokit:cokit-bom:<version>"))
+    testImplementation("io.github.vupoint.cokit:cokit-testing")
+}
+```
+
 ## Basic Example
 
 ```kotlin
