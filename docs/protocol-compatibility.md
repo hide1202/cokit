@@ -456,9 +456,10 @@ Goal: make the API safe to publish and maintain as upstream evolves.
 - `checkPublicApiExposure` runs during `check` and prevents accidental primary
   client API exposure of `JsonElement` and JSON-RPC envelope types. Use typed
   models or `CodexJsonPayload` for documented compatibility fields.
-- `checkPublicApiBaseline` compares public main-source declarations against
-  `api/public-api.txt`. Review intentional API changes, then refresh the
-  baseline with `./gradlew updatePublicApiBaseline`.
+- `checkKotlinAbi` runs during `check` for published Kotlin library modules and
+  compares compiled ABI declarations against the committed KGP reference dumps
+  under each module's `abi/` directory. Review intentional API changes, then
+  refresh the reference dumps with `./gradlew updateKotlinAbi`.
 - `checkPrimaryApiDocsAlignment` keeps README, getting-started, and the sample
   CLI centered on typed CoKit APIs. Raw app-server method strings belong in
   protocol compatibility or inventory docs, not primary examples.

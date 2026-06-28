@@ -173,7 +173,7 @@ Run:
 ```
 
 `check` includes unit tests, coverage verification, module-boundary validation,
-public API exposure checks, public API baseline checks, and primary docs/sample
+public API exposure checks, Kotlin ABI validation, and primary docs/sample
 alignment checks.
 
 Run JVM unit tests only:
