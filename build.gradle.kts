@@ -1,5 +1,8 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.artifacts.ProjectDependency
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import javax.xml.parsers.DocumentBuilderFactory
@@ -38,6 +41,10 @@ val publishedArtifactProjectPaths = provider {
     publishedLibraryProjectPaths.get() + bomProjectPath
 }
 
+val publishedLibraryProjects = provider {
+    publishedLibraryProjectPaths.get().map { path -> project(path) }
+}
+
 val publishedArtifactProjects = provider {
     publishedArtifactProjectPaths.get().map { path -> project(path) }
 }
@@ -63,6 +70,17 @@ configure(publishedArtifactProjects.get()) {
                     organization.set("vupoint")
                     organizationUrl.set("https://github.com/vupoint")
                 }
+            }
+        }
+    }
+}
+
+configure(publishedLibraryProjects.get()) {
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<KotlinMultiplatformExtension>("kotlin") {
+            extensions.configure<AbiValidationMultiplatformExtension>("abiValidation") {
+                @OptIn(ExperimentalAbiValidation::class)
+                enabled.set(true)
             }
         }
     }
