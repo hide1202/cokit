@@ -25,9 +25,9 @@ value class ApprovalPolicy(val value: String) {
 @JvmInline
 value class SandboxPolicy(val value: String) {
     companion object {
-        val ReadOnly = SandboxPolicy("read-only")
-        val WorkspaceWrite = SandboxPolicy("workspace-write")
-        val DangerFullAccess = SandboxPolicy("danger-full-access")
+        val ReadOnly = SandboxPolicy("readOnly")
+        val WorkspaceWrite = SandboxPolicy("workspaceWrite")
+        val DangerFullAccess = SandboxPolicy("dangerFullAccess")
     }
 }
 
